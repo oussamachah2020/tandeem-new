@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <title>Bienvenue sur tandeem!</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+        }
+        .header {
+            background-color: #f8f8f8;
+            padding: 10px;
+            text-align: center;
+        }
+        .content {
+            padding: 20px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="email-container">
+    <div class="header">
+        <h1>🎉 Bienvenue sur Tandeem !</h1>
+    </div>
+    <div class="content">
+        <p>Bonjour <%= name %> 👋</p>
+        <p>✨ Grâce à votre entreprise, vous avez désormais accès à Tandeem, une plateforme pensée pour vous gâter avec des avantages exclusifs et des services qui enrichiront votre quotidien !</p>
+        <p>Nous sommes heureux de vous informer que votre compte tandeem a été bien créé.sssssss</p>
+        <p>🔑 Vos identifiants:</p>
+        <p>
+            <strong>Email :</strong><%= email %><br>
+            <strong>Mot de passe initiale:</strong> <%= password %>
+        </p>
+        <p>Veuillez conserver vos identifiants en toute sécurité et ne les partagez avec personne.</p>
+        <p>📲 Téléchargez l’application Tandeem sur l'<a href="#">App Store</a> ou <a href="#">Google Play</a> et commencez à explorer vos avantages dès aujourd’hui !</p>
+        <p>Bienvenue et bonne découverte !</p>
+        <p>🎈 L’équipe Tandeem</p>
+    </div>
+    <div class="footer">
+        <p>Si vous avez des questions, n'hésitez pas à <a href="mailto:support@tandeem.com">contacter notre équipe de
+                support</a>.</p>
+        <p><%= new Date().getFullYear() %> &copy; tandeem. Tous droits réservés.</p>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,414 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Contract {
+  id          String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  scan        String
+  from        DateTime           @db.Date
+  to          DateTime           @db.Date
+  prematureTo DateTime?          @db.Date
+  status      ContractStatusName @default(Active)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  customer Customer? @relation
+  partner  Partner?  @relation
+
+  @@map("contract")
+}
+
+model Publication {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title     String
+  content   String
+  photo     String
+  pinned    Boolean
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  customerId String?   @db.Uuid
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@map("publication")
+}
+
+model Customer {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name         String
+  address      String
+  website      String
+  logo         String
+  category     Category @default(NA)
+  maxEmployees Int
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  representativeId String         @unique @db.Uuid
+  representative   Representative @relation(fields: [representativeId], references: [id], onDelete: NoAction)
+  contractId       String         @unique @db.Uuid
+  contract         Contract       @relation(fields: [contractId], references: [id], onDelete: NoAction)
+
+  acceptedOffers AcceptedOffer[] @relation
+  departments    Department[]    @relation
+  employees      Employee[]      @relation
+  users          User[]          @relation
+  media          MediaLibrary[]  @relation()
+
+  offers       Offer[]       @relation()
+  publications Publication[] @relation()
+
+  @@map("customer")
+}
+
+model Department {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  customerId String   @db.Uuid
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  employees Employee[] @relation
+
+  @@map("department")
+}
+
+model Employee {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  firstName    String
+  lastName     String
+  registration String?
+  phone        String?
+  photo        String
+  level        JobLevel
+  acceptedTOS  Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId       String     @unique @db.Uuid
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  customerId   String     @db.Uuid
+  customer     Customer   @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  departmentId String     @db.Uuid
+  department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+
+  consumedOffers EmployeeConsumedOffers[] @relation
+  IdeaBox        IdeaBox[]
+
+  @@map("employee")
+}
+
+model Offer {
+  id               String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title            String
+  description      String
+  image            String
+  category         SubCategory      @default(NA)
+  from             DateTime         @db.Date
+  to               DateTime         @db.Date
+  initialPrice     Float?
+  finalPrice       Float?
+  discount         Float?
+  subPaymentMethod SubPaymentMethod
+  paymentDetails   Json             @db.JsonB
+  status           OfferStatusName  @default(Active)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  customerId String?   @db.Uuid
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  partnerId  String?   @db.Uuid
+  partner    Partner?  @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+
+  acceptedBy        AcceptedOffer[]          @relation
+  consumerEmployees EmployeeConsumedOffers[] @relation
+
+  @@map("offer")
+}
+
+model AcceptedOffer {
+  id        String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  for       JobLevel[]
+  pinned    Boolean    @default(false)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  offerId    String   @db.Uuid
+  offer      Offer    @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  customerId String   @db.Uuid
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@unique([customerId, offerId])
+  @@map("accepted_offer")
+}
+
+model Partner {
+  id        String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String
+  address   String
+  website   String
+  logo      String
+  category  Category      @default(NA)
+  accepts   PaymentMethod
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  contractId       String         @unique @db.Uuid
+  contract         Contract       @relation(fields: [contractId], references: [id], onDelete: NoAction)
+  representativeId String         @unique @db.Uuid
+  representative   Representative @relation(fields: [representativeId], references: [id], onDelete: NoAction)
+
+  offers Offer[] @relation
+
+  @@map("partner")
+}
+
+model Representative {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  fullName  String
+  email     String
+  phone     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  customer Customer? @relation
+  partner  Partner?  @relation
+
+  @@map("representative")
+}
+
+model User {
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email               String    @unique
+  password            String
+  role                Role
+  isActive            Boolean   @default(true)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  customerId String?   @db.Uuid
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  employee   Employee? @relation
+  admin      Admin?    @relation
+
+  @@map("user")
+}
+
+model Admin {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @unique @db.Uuid
+  name      String
+  photo     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("admin")
+}
+
+model MediaLibrary {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title       String
+  description String
+  url         String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  customerId String?   @db.Uuid
+
+  @@map("media_library")
+}
+
+model EmployeeConsumedOffers {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  employeeId String @db.Uuid
+  offerId    String @db.Uuid
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  offer    Offer    @relation(fields: [offerId], references: [id], onDelete: Cascade)
+
+  @@unique([employeeId, offerId])
+  @@map("employee_offers")
+}
+
+model IdeaBox {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title       String
+  description String
+  archived    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  employeeId String @db.Uuid
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@map("idea_box")
+}
+
+enum PaymentMethod {
+  Card
+  Coupon
+  Ticket
+  PromoCode
+}
+
+enum SubPaymentMethod {
+  NA
+  PromoCode_OneCode
+  PromoCode_MultipleCodes
+  Coupon_Pregenerated
+  Coupon_Generated
+}
+
+enum Role {
+  TANDEEM
+  TANDEEM2
+  CUSTOMER
+  CUSTOMER2
+  EMPLOYEE
+}
+
+enum JobLevel {
+  BoardMember
+  CEO
+  ExecutiveCommittee
+  Manager
+  ProjectLead
+  TeamLead
+  Coordinator
+  Technician
+  Assistant
+  Intern
+}
+
+enum ContractStatusName {
+  Active
+  SoonToBeEnded
+  Ended
+  SoonToBeTerminated
+  Terminated
+}
+
+enum OfferStatusName {
+  Active
+  Inactive
+  NoContract
+}
+
+enum Category {
+  NA
+  Animals
+  MoneyAndFinance
+  Beauty
+  BabiesAndKids
+  Wellness
+  CultureAndEntertainment
+  Education
+  Food
+  Technology
+  HomeAndDecoration
+  Mobility
+  FashionAndAccessories
+  AmusementParks
+  PressAndMagazines
+  Catering
+  Health
+  DigitalServices
+  HomeServices
+  Sports
+  Travel
+}
+
+enum SubCategory {
+  NA
+  Animals_PetCare
+  Animals_PetFood
+  Animals_PetAccessories
+  MoneyAndFinance_Banking
+  MoneyAndFinance_Investments
+  MoneyAndFinance_LoansAndCredits
+  Beauty_Makeup
+  Beauty_SkinCare
+  Beauty_HairCare
+  Beauty_Perfume
+  BabiesAndKids_BabyClothing
+  BabiesAndKids_Toys
+  BabiesAndKids_BabyGear
+  Wellness_YogaAndMeditation
+  Wellness_SpaAndMassages
+  Wellness_Nutrition
+  Wellness_Fitness
+  CultureAndEntertainment_Concerts
+  CultureAndEntertainment_Movies
+  CultureAndEntertainment_ArtExhibitions
+  CultureAndEntertainment_Theater
+  CultureAndEntertainment_Museum
+  Education_OnlineCourses
+  Education_BooksAndManuals
+  Education_SchoolSupplies
+  Education_DaycareAndChildcare
+  Food_Supermarkets
+  Food_Butcher
+  Food_Bakery
+  Food_Delicatessen
+  Technology_PhonesAndTablets
+  Technology_ComputersAndAccessories
+  Technology_ElectronicDevices
+  Technology_SmallAppliances
+  Technology_LargeAppliances
+  Technology_Repair
+  HomeAndDecoration_Furniture
+  HomeAndDecoration_InteriorDecoration
+  HomeAndDecoration_DIY
+  Mobility_CarRental
+  Mobility_ChauffeuredTransport
+  Mobility_Carpooling
+  Mobility_PublicTransport
+  FashionAndAccessories_MensClothing
+  FashionAndAccessories_WomensClothing
+  FashionAndAccessories_FashionAccessories
+  FashionAndAccessories_Shoes
+  AmusementParks_ThemeParks
+  AmusementParks_ZoosAndAquariums
+  AmusementParks_NaturalParks
+  PressAndMagazines_MagazineSubscriptions
+  PressAndMagazines_DailyNewspapers
+  PressAndMagazines_SpecializedJournals
+  Catering_Burger
+  Catering_Pizza
+  Catering_Asian
+  Catering_Oriental
+  Catering_Italian
+  Catering_LatinAmerican
+  Catering_Mediterranean
+  Catering_International
+  Health_Pharmacy
+  Health_Laboratory
+  Health_MedicalConsultations
+  Health_HealthProducts
+  DigitalServices_VODStreaming
+  DigitalServices_MusicStreaming
+  HomeServices_Housekeeping
+  HomeServices_Gardening
+  HomeServices_Repairs
+  Sports_SportingGoods
+  Sports_GymsAndFitness
+  Sports_OtherSportsActivities
+  Sports_Ticketing
+  Travel_Plane
+  Travel_Train
+  Travel_HotelsAndAccommodation
+  Travel_TravelPackages
+}

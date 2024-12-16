@@ -1,0 +1,1 @@
+SELECT cron.schedule_in_database('update_contract_statuses', '0 1 * * *', 'SELECT * FROM update_contract_status()', 'tandeem-prod');
