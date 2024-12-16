@@ -10,18 +10,22 @@ import ContractUpdateForm from "@/domain/contracts/components/ContractUpdateForm
 import {AuthenticatedUser} from "@/common/services/AuthService";
 import useModal from "@/common/hooks/UseModal";
 import {getToken} from "next-auth/jwt";
-import {getDownloadUrl} from "@/common/utils/functions";
-import {Customer, Partner} from "@prisma/client";
+import { formatDate, getDownloadUrl } from "@/common/utils/functions";
+import { Customer, Partner } from "@prisma/client";
 import ActionBar from "@/common/components/global/ActionBar";
 import useSearch from "@/common/hooks/UseSearch";
 import EmptyContent from "@/common/components/atomic/EmptyContent";
 import ContractCard from "@/domain/contracts/components/ContractCard";
-import {ArrayElement} from "@/common/utils/types";
+import { ArrayElement } from "@/common/utils/types";
+import Datatable from "@/common/components/datatable/Datatable";
+import { DatatableRow } from "@/common/components/datatable/DatatableRow";
+import { DatatableValue } from "@/common/components/datatable/DatatableValue";
+import { ExternalLinkIcon, PenIcon } from "lucide-react";
 
 interface Props {
-    user: AuthenticatedUser
-    customerContracts: Awaited<ReturnType<typeof contractService.getAll>>
-    partnerContracts: Awaited<ReturnType<typeof contractService.getAll>>
+  user: AuthenticatedUser;
+  customerContracts: Awaited<ReturnType<typeof contractService.getAll>>;
+  partnerContracts: Awaited<ReturnType<typeof contractService.getAll>>;
 }
 
 const MOCK_CONTRACTS = [
@@ -112,6 +116,7 @@ const Contracts: NextPage<Props> = ({
   const [searchResultedContracts, onSearchInputChange] = useSearch<
     ArrayElement<typeof contracts>
   >(contracts, ["partner.name" as any, "customer.name" as any]);
+
   return (
     <>
       <Main section={SectionName.Contracts} user={user}>
@@ -137,9 +142,9 @@ const Contracts: NextPage<Props> = ({
           ]}
           selectedTabIndex={selectedTabIndex}
         >
-          {searchResultedContracts.length > 0 ? (
+          {/* {MOCK_DATA.length > 0 ? (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-              {searchResultedContracts.map((contract, idx) => (
+              {MOCK_DATA.map((contract, idx) => (
                 <ContractCard
                   key={idx}
                   contract={contract}
@@ -150,7 +155,70 @@ const Contracts: NextPage<Props> = ({
             </div>
           ) : (
             <EmptyContent />
-          )}
+          )} */}
+
+          <Datatable
+            isEmpty={MOCK_CONTRACTS.length === 0}
+            headers={[
+              "Scan",
+              "Date de début",
+              "Date de fin",
+              "Date de résiliation anticipée",
+              "Statut",
+            ]}
+          >
+            {MOCK_CONTRACTS.map((contract) => (
+              <DatatableRow key={contract.id}>
+                <DatatableValue>
+                  <a
+                    href={contract.scan}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Voir le contrat
+                  </a>
+                </DatatableValue>
+                <DatatableValue>
+                  {formatDate(new Date(contract.from))}
+                </DatatableValue>
+                <DatatableValue>
+                  {formatDate(new Date(contract.to))}
+                </DatatableValue>
+                <DatatableValue>
+                  {contract.prematureTo
+                    ? formatDate(new Date(contract.prematureTo))
+                    : "Non applicable"}
+                </DatatableValue>
+                <DatatableValue>
+                  <span
+                    className={`px-2 py-1 text-sm font-medium rounded ${
+                      contract.status === "Active"
+                        ? "bg-green-100 text-green-800"
+                        : contract.status === "Expired"
+                        ? "bg-red-100 text-red-800"
+                        : "bg-gray-100 text-gray-800"
+                    }`}
+                  >
+                    {contract.status}
+                  </span>
+                </DatatableValue>
+                <DatatableValue className="flex flex-row items-center gap-2">
+                  <button
+                    onClick={() => toggleContractModal(true, contract)}
+                    className="bg-gray-200 h-8 w-8 flex justify-center items-center rounded-full"
+                  >
+                    <ExternalLinkIcon className="h-4 w-4 " />
+                  </button>
+                  <button
+                    onClick={() => toggleEditContractModal(true, contract)}
+                    className="bg-gray-200 h-8 w-8 flex justify-center items-center rounded-full"
+                  >
+                    <PenIcon className="h-4 w-4 " />
+                  </button>
+                </DatatableValue>
+              </DatatableRow>
+            ))}
+          </Datatable>
         </Tab>
       </Main>
       <Modal

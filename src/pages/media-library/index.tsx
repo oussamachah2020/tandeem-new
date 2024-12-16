@@ -21,46 +21,56 @@ interface Props {
     mediaLibrary: Awaited<ReturnType<typeof mediaLibraryService.getAll>>
 }
 
-const MediaLibrary: NextPage<Props> = ({user, mediaLibrary}) => {
-    const [searchResultedMediaLibrary, onSearchInputChange] = useSearch(mediaLibrary, ['title', 'description'])
-    const [, isAddMediaModalShown, toggleAddMediaModal] = useModal(false)
-    const [mediaToUpdate, isUpdateMediaModalShown, toggleUpdateMediaModal] = useModal<ArrayElement<typeof mediaLibrary>>()
-    const { authenticatedUser } = useAuthStore();
-    const router = useRouter();
 
-    useEffect(() => {
-      if (authenticatedUser) {
-        if (getRoleLevel(authenticatedUser?.role) === 2)
-          return router.replace("/media-library/customer");
+
+const MediaLibrary: NextPage<Props> = ({ user, mediaLibrary }) => {
+  const [searchResultedMediaLibrary, onSearchInputChange] = useSearch(
+    mediaLibrary,
+    ["title", "description"]
+  );
+  const [, isAddMediaModalShown, toggleAddMediaModal] = useModal(false);
+  const [mediaToUpdate, isUpdateMediaModalShown, toggleUpdateMediaModal] =
+    useModal<ArrayElement<typeof mediaLibrary>>();
+  const { authenticatedUser } = useAuthStore();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (authenticatedUser) {
+      if (getRoleLevel(authenticatedUser?.role) === 2) {
+        router.replace("/media-library/customer");
       }
-    }, [authenticatedUser]);
+    }
+  }, [authenticatedUser]);
 
-    return (
-        <Main section={SectionName.MediaLibrary} user={user}>
-            <ActionBar
-                onSearchInputChange={onSearchInputChange}
-                action={{text: 'Ajouter un média', onClick: () => toggleAddMediaModal(true)}}
-            />
-            <MediaLibraryTable
-                mediaLibrary={searchResultedMediaLibrary}
-                onUpdate={(media) => toggleUpdateMediaModal(true, media)}
-            />
-            <Modal
-                title='Ajouter un média'
-                isShown={isAddMediaModalShown}
-                onClose={() => toggleAddMediaModal(false)}
-            >
-                <MediaForm/>
-            </Modal>
-            <Modal
-                title='Modifier un média'
-                isShown={isUpdateMediaModalShown}
-                onClose={() => toggleUpdateMediaModal(false)}
-            >
-                <MediaForm media={mediaToUpdate}/>
-            </Modal>
-        </Main>
-    );
+  return (
+    <Main section={SectionName.MediaLibrary} user={user}>
+      <ActionBar
+        onSearchInputChange={onSearchInputChange}
+        action={{
+          text: "Ajouter un média",
+          onClick: () => toggleAddMediaModal(true),
+        }}
+      />
+      <MediaLibraryTable
+        mediaLibrary={searchResultedMediaLibrary}
+        onUpdate={(media) => toggleUpdateMediaModal(true, media)}
+      />
+      <Modal
+        title="Ajouter un média"
+        isShown={isAddMediaModalShown}
+        onClose={() => toggleAddMediaModal(false)}
+      >
+        <MediaForm />
+      </Modal>
+      <Modal
+        title="Modifier un média"
+        isShown={isUpdateMediaModalShown}
+        onClose={() => toggleUpdateMediaModal(false)}
+      >
+        <MediaForm media={mediaToUpdate} />
+      </Modal>
+    </Main>
+  );
 };
 
 // export const getServerSideProps: GetServerSideProps = async (context) => {

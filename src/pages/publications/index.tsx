@@ -28,7 +28,7 @@ const MOCK_PUBS = [
     title: "How to Get Started with React",
     content: `React is a powerful JavaScript library for building user interfaces. In this guide, we cover everything you need to know to start creating your first React app. From setting up the development environment to understanding JSX, components, and state management, you'll learn the foundational concepts needed to build modern web applications.`,
     photo:
-      "https://cdn.pixabay.com/photo/2015/03/17/02/01/cubes-677092_1280.png",
+      "https://www.angiil.com/wp-content/uploads/2021/11/Pub-e1637242285887.png",
     pinned: true,
     createdAt: new Date("2024-01-01T10:00:00Z"),
     updatedAt: new Date("2024-01-02T15:30:00Z"),
@@ -39,7 +39,51 @@ const MOCK_PUBS = [
     title: "Mastering TypeScript: Tips and Tricks",
     content: `TypeScript enhances JavaScript by adding static types, helping developers catch bugs earlier in the development process. In this article, we share practical tips and advanced techniques to use TypeScript effectively, including handling complex types, leveraging utility types, and integrating TypeScript with popular frameworks like Angular, React, and Node.js.`,
     photo:
-      "https://cdn.pixabay.com/photo/2015/03/17/02/01/cubes-677092_1280.png",
+      "https://www.angiil.com/wp-content/uploads/2021/11/Pub-e1637242285887.png",
+    pinned: false,
+    createdAt: new Date("2024-02-10T09:15:00Z"),
+    updatedAt: new Date("2024-02-15T13:45:00Z"),
+    customerId: null,
+  },
+  {
+    id: "3",
+    title: "Mastering TypeScript: Tips and Tricks",
+    content: `TypeScript enhances JavaScript by adding static types, helping developers catch bugs earlier in the development process. In this article, we share practical tips and advanced techniques to use TypeScript effectively, including handling complex types, leveraging utility types, and integrating TypeScript with popular frameworks like Angular, React, and Node.js.`,
+    photo:
+      "https://www.angiil.com/wp-content/uploads/2021/11/Pub-e1637242285887.png",
+    pinned: false,
+    createdAt: new Date("2024-02-10T09:15:00Z"),
+    updatedAt: new Date("2024-02-15T13:45:00Z"),
+    customerId: null,
+  },
+  {
+    id: "4",
+    title: "Mastering TypeScript: Tips and Tricks",
+    content: `TypeScript enhances JavaScript by adding static types, helping developers catch bugs earlier in the development process. In this article, we share practical tips and advanced techniques to use TypeScript effectively, including handling complex types, leveraging utility types, and integrating TypeScript with popular frameworks like Angular, React, and Node.js.`,
+    photo:
+      "https://www.angiil.com/wp-content/uploads/2021/11/Pub-e1637242285887.png",
+    pinned: false,
+    createdAt: new Date("2024-02-10T09:15:00Z"),
+    updatedAt: new Date("2024-02-15T13:45:00Z"),
+    customerId: null,
+  },
+  {
+    id: "5",
+    title: "Mastering TypeScript: Tips and Tricks",
+    content: `TypeScript enhances JavaScript by adding static types, helping developers catch bugs earlier in the development process. In this article, we share practical tips and advanced techniques to use TypeScript effectively, including handling complex types, leveraging utility types, and integrating TypeScript with popular frameworks like Angular, React, and Node.js.`,
+    photo:
+      "https://www.angiil.com/wp-content/uploads/2021/11/Pub-e1637242285887.png",
+    pinned: false,
+    createdAt: new Date("2024-02-10T09:15:00Z"),
+    updatedAt: new Date("2024-02-15T13:45:00Z"),
+    customerId: null,
+  },
+  {
+    id: "6",
+    title: "Mastering TypeScript: Tips and Tricks",
+    content: `TypeScript enhances JavaScript by adding static types, helping developers catch bugs earlier in the development process. In this article, we share practical tips and advanced techniques to use TypeScript effectively, including handling complex types, leveraging utility types, and integrating TypeScript with popular frameworks like Angular, React, and Node.js.`,
+    photo:
+      "https://www.angiil.com/wp-content/uploads/2021/11/Pub-e1637242285887.png",
     pinned: false,
     createdAt: new Date("2024-02-10T09:15:00Z"),
     updatedAt: new Date("2024-02-15T13:45:00Z"),
@@ -62,6 +106,7 @@ const Publications: NextPage<Props> = ({ user, publications }) => {
   const [filteredPublications, onFilterValueChange] = useFilter<
     ArrayElement<typeof publications>
   >(searchResultedPublications, ["pinned"]);
+
   return (
     <>
       <Main section={SectionName.Publications} user={user}>
@@ -83,20 +128,23 @@ const Publications: NextPage<Props> = ({ user, publications }) => {
             onValueChange={(event) => onFilterValueChange("pinned", event)}
           />
         </FilterGroup>
-
-        {MOCK_PUBS.length > 0 ? (
-          <div className="grid grid-cols-1 h-[53rem] lg:grid-cols-2 gap-4">
-            {MOCK_PUBS.map((publication, idx) => (
-              <PublicationCard
-                key={idx}
-                publication={publication}
-                onUpdate={() => togglePublicationUpdateModal(true, publication)}
-              />
-            ))}
-          </div>
-        ) : (
-          <EmptyContent />
-        )}
+        <div className="h-[38rem] overflow-y-auto pb-10">
+          {MOCK_PUBS.length > 0 ? (
+            <div className="grid overflow-y-auto grid-cols-1 lg:grid-cols-2 gap-4">
+              {MOCK_PUBS.map((publication, idx) => (
+                <PublicationCard
+                  key={idx}
+                  publication={publication}
+                  onUpdate={() =>
+                    togglePublicationUpdateModal(true, publication)
+                  }
+                />
+              ))}
+            </div>
+          ) : (
+            <EmptyContent />
+          )}
+        </div>
       </Main>
       <Modal
         title="Ajouter une publication"

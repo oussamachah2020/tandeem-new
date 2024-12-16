@@ -11,7 +11,7 @@ const Datatable: FC<Props> = ({ isEmpty, headers, children }) =>
   isEmpty ? (
     <EmptyContent />
   ) : (
-    <div className="bg-white rounded-lg border px-6 py-4 overflow-x-auto">
+    <div className="bg-white rounded-lg border px-6 py-4 overflow-x-auto overflow-y-auto max-h-[550px] border-t border-gray-200">
       <table className="w-full text-left border-collapse">
         <thead>
           <tr>
