@@ -84,11 +84,6 @@ export default async function handler(
       { expiresIn: "1d" }
     );
 
-    // Save the refresh token in the database
-    await prisma.user.update({
-      where: { id: newAccount.id },
-      data: { resetToken: refreshToken },
-    });
 
     return res.status(201).json({
       message: "Account created successfully",
