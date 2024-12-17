@@ -46,7 +46,7 @@ export const Main: FC<Props> = ({ user, section, children }) => {
 
   return (
     <>
-      <div className="flex overflow-hidden">
+      <div className="flex h-screen overflow-hidden">
         <aside
           className={`fixed top-0 left-0 z-40 h-screen transform transition-transform duration-300 ease-in-out bg-white border-r
     ${
@@ -111,7 +111,12 @@ export const Main: FC<Props> = ({ user, section, children }) => {
             </button>
             <TitleBar title={section} userImageSrc={undefined} />
           </div>
-          <div className="py-5">{children}</div>
+          <div
+            className="flex-1 py-5 "
+            style={{ maxHeight: "calc(100vh - 8rem)" }} // Adjust height dynamically
+          >
+            {children}
+          </div>
         </main>
 
         {/* Mobile Overlay */}

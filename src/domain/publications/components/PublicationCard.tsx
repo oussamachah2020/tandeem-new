@@ -15,12 +15,12 @@ interface Props {
 const PublicationCard: FC<Props> = ({ publication, onUpdate }) => (
   <div className="flex flex-col h-[38rem] gap-6 bg-white rounded-xl p-6 shadow-lg border border-gray-200">
     <div className="col-span-2 flex flex-col gap-5">
-      <img src={publication.photo} alt="photo" />
-      <ImagePreview
+      <img className="border rounded-md" src={publication.photo} alt="photo" />
+      {/* <ImagePreview
         imageRef={publication.photo}
         width="w-full"
         aspectRatio="aspect-video"
-      />
+      /> */}
     </div>
 
     <div className="col-span-3 flex flex-col gap-4">
@@ -52,7 +52,7 @@ const PublicationCard: FC<Props> = ({ publication, onUpdate }) => (
         </div>
 
         {/* Action Buttons */}
-        <div className="flex">
+        <div className="flex flex-col gap-1 lg:flex-row">
           <ActionButton
             icon="PencilSquareIcon"
             hoverColor="hover:bg-blue-100"

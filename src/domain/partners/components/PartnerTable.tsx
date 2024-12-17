@@ -17,50 +17,47 @@ interface Props {
 const PartnerTable: FC<Props> = ({partners, onUpdate, onClick}) => {
     const {label, category, paymentMethod, confirmation} = useStaticValues()
     return (
-        <Datatable
-            headers={[
-                label.companyName,
-                label.address,
-                label.category,
-                label.paymentMethod,
-                label.contract
-            ]}
-            isEmpty={partners.length === 0}
-        >
-            {partners.map((partner, idx) =>
-                <DatatableRow
-                    key={idx}
-                    onClick={() => onClick(partner)}
-                    onUpdate={() => onUpdate(partner)}
-                    onDelete={{
-                        action: '/api/partners/delete',
-                        resourceId: partner.id,
-                        message: confirmation.partnerDelete
-                    }}>
-                    <DatatableValue className='flex items-center gap-5'>
-                        <ImagePreview imageRef={partner.logo}/>
-                        {partner.name}
-                    </DatatableValue>
-                    <DatatableValue>
-                        {partner.address}
-                    </DatatableValue>
-                    <DatatableValue>
-                        <Label>
-                            {category[partner.category]}
-                        </Label>
-                    </DatatableValue>
-                    <DatatableValue>
-                        <Label>
-                            {paymentMethod[partner.accepts as never]}
-                        </Label>
-                    </DatatableValue>
-                    <DatatableValue>
-                        <ContractStatus status={partner.contract.status}/>
-                    </DatatableValue>
-                </DatatableRow>
-            )}
-        </Datatable>
-    )
+      <Datatable
+        headers={[
+          label.companyName,
+          label.address,
+          label.category,
+          label.paymentMethod,
+          label.contract,
+        ]}
+        isEmpty={partners.length === 0}
+      >
+        {partners.map((partner, idx) => (
+          <DatatableRow
+            key={idx}
+            onClick={() => onClick(partner)}
+            onUpdate={() => onUpdate(partner)}
+            onDelete={{
+              action: "/api/partners/delete",
+              resourceId: partner.id,
+              message: confirmation.partnerDelete,
+            }}
+          >
+            <DatatableValue className="flex items-center gap-5">
+              <ImagePreview imageRef={partner.logo} />
+              {partner.name}
+            </DatatableValue>
+            <DatatableValue className="truncate">
+              {partner.address}
+            </DatatableValue>
+            <DatatableValue>
+              <Label>{category[partner.category]}</Label>
+            </DatatableValue>
+            <DatatableValue>
+              <Label>{paymentMethod[partner.accepts as never]}</Label>
+            </DatatableValue>
+            <DatatableValue>
+              <ContractStatus status={partner.contract.status} />
+            </DatatableValue>
+          </DatatableRow>
+        ))}
+      </Datatable>
+    );
 }
 
 export default PartnerTable

@@ -119,6 +119,8 @@ model Offer {
   discount         Float?
   subPaymentMethod SubPaymentMethod
   paymentDetails   Json             @db.JsonB
+  latitude         BigInt?
+  longitude        BigInt?
   status           OfferStatusName  @default(Active)
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
