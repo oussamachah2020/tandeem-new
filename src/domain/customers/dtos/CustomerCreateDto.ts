@@ -2,17 +2,20 @@ import {Category} from "@prisma/client";
 import {Blob} from "buffer";
 
 export interface CustomerCreateDto {
-    name: string,
-    address: string,
-    email: string
-    website: string,
-    category: Category,
-    maxEmployees: number,
-    contractFrom: string
-    contractTo: string
-    representativeName: string,
-    representativeEmail: string,
-    representativePhone: string
+  name: string;
+  address: string;
+  email: string;
+  website: string;
+  userId: string;
+  category: Category;
+  maxEmployees: number;
+  contractFrom: string;
+  contractTo: string;
+  representativeName: string;
+  representativeEmail: string;
+  representativePhone: string;
+  logoUrl: string;
+  contractScan: string;
 }
 
 export interface CustomerCreateFilesDto {
