@@ -2,6 +2,7 @@ import Button from "@/common/components/atomic/Button";
 import { Input } from "@/common/components/atomic/Input";
 import { useStaticValues } from "@/common/context/StaticValuesContext";
 import { useAuthStore } from "@/zustand/auth-store";
+import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 
 // Define the form data type for TypeScript
@@ -31,6 +32,8 @@ export const CustomerCreateForm = () => {
     formState: { errors, isValid, isSubmitting },
     reset,
   } = useForm<CustomerCreateFormData>();
+  const [logo, setLogo] = useState<File | null>(null);
+  const [contract, setContract] = useState<File | null>(null);
 
   const onSubmit = async (data: CustomerCreateFormData) => {
     try {
@@ -120,19 +123,17 @@ export const CustomerCreateForm = () => {
                 />
               )}
             />
-            <Controller
-              name="logo"
-              control={control}
-              render={({ field }) => (
-                <Input
-                  icon="PhotoIcon"
-                  label={label.logo}
-                  placeholder={label.logo}
-                  type="url"
-                  {...field}
-                />
-              )}
+
+            <Input
+              icon="PhotoIcon"
+              label={label.logo}
+              placeholder={label.logo}
+              type="file"
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setLogo(e.target.files ? e.target?.files[0] : null)
+              }
             />
+
             <Controller
               name="category"
               control={control}
@@ -179,19 +180,16 @@ export const CustomerCreateForm = () => {
       <div className="flex flex-col gap-3">
         <h3 className="font-medium text-xl">{label.contract}</h3>
         <div className="grid grid-cols-3 gap-3">
-          <Controller
-            name="contractScan"
-            control={control}
-            render={({ field }) => (
-              <Input
-                icon="DocumentTextIcon"
-                label={label.scan}
-                placeholder={label.scan}
-                type="url"
-                {...field}
-              />
-            )}
+          <Input
+            icon="DocumentTextIcon"
+            label={label.scan}
+            placeholder={label.scan}
+            type="file"
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setContract(e.target.files ? e.target?.files[0] : null)
+            }
           />
+
           <Controller
             name="contractFrom"
             control={control}

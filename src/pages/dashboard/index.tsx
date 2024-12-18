@@ -13,6 +13,7 @@ import React, { useEffect, useState } from "react";
 import { Main } from "@/common/components/global/Main";
 import { getRoleLevel } from "@/common/utils/functions";
 import { useAuthStore } from "@/zustand/auth-store";
+import { RefreshCcw } from "lucide-react";
 
 interface Props {
   user: AuthenticatedUser;
@@ -32,7 +33,7 @@ interface KPI {
 }
 
 const Dashboard = ({}: Props) => {
-  const { authenticatedUser } = useAuthStore(); // Access Zustand auth store
+  const { authenticatedUser, accessToken } = useAuthStore(); // Access Zustand auth store
   const [kpis, setKpis] = useState<KPI>({
     admins: 0,
     customers: 0,
@@ -45,15 +46,19 @@ const Dashboard = ({}: Props) => {
     awaitingOffers: 0,
     ideaBox: 0,
   });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchKPIs = async () => {
+      setLoading(true);
       try {
         const response = await fetch("/api/dashboard/kpis", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
           body: JSON.stringify({
-            role: authenticatedUser?.role,
             customerId: authenticatedUser?.customer?.id,
           }),
         });
@@ -62,11 +67,21 @@ const Dashboard = ({}: Props) => {
         setKpis(data.kpis);
       } catch (error) {
         console.error("Error fetching KPIs:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
     if (authenticatedUser) fetchKPIs();
   }, [authenticatedUser]);
+
+  if (loading) {
+    return (
+      <div className="h-screen flex justify-center items-center w-full bg-white">
+        <RefreshCcw className="h-10 w-10 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <Main section={SectionName.Dashboard} user={authenticatedUser}>
