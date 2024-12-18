@@ -1,39 +1,49 @@
-import { NextApiRequest, NextApiResponse } from "next";
+import { NextApiResponse } from "next";
+import { AuthenticatedRequest, authMiddleware } from "@/apiMiddleware";
 import adminService from "@/domain/admins/services/AdminService";
-import { getAuthStore } from "@/zustand/auth-store";
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
   try {
     // Ensure this endpoint only handles POST requests
     if (req.method !== "POST") {
       return res.status(405).json({ message: "Method Not Allowed" });
     }
 
-    // Parse the request body
-    const { body } = req;
+    // At this point, req.user is guaranteed by the authMiddleware if token is valid
+    const user = req.user;
 
-    // Get the authenticated user from the Zustand store
-    const user = getAuthStore().authenticatedUser;
+    const existingUser = await prisma.user.findUnique({
+      where: {
+        id: user?.id,
+      },
+      select: {
+        customerId: true,
+      },
+    });
 
-    if (!user || !user.customer?.id) {
+    // Ensure user and user.customer.id are available
+    if (!user || !existingUser?.customerId) {
       return res
         .status(401)
         .json({ message: "Unauthorized: Missing user or customer ID" });
     }
 
-    // Add the new admin, attaching the user data and URL
+    const body = req.body; // The Admin creation DTO data from the request body
+
+    // Add the new admin, attaching the user’s customerId
     const newAdmin = await adminService.addOne({
-      ...body, // Admin creation DTO data from the request body
-      customerId: user.customer?.id, // Include customer ID from the Zustand store
+      ...body,
+      customerId: existingUser?.customerId,
     });
 
     // Respond with the created admin data
-    res.status(201).json(newAdmin);
-  } catch (error) {
+    return res.status(201).json(newAdmin);
+  } catch (error: any) {
     console.error("Error creating admin:", error);
-    res.status(500).json({ message: "Internal Server Error", error: error });
+    return res
+      .status(500)
+      .json({ message: "Internal Server Error", error: error });
   }
-}
+};
+
+export default authMiddleware(handler);

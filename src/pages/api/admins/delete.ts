@@ -1,14 +1,17 @@
-import { NextApiRequest, NextApiResponse } from "next";
+import { NextApiResponse } from "next";
+import { AuthenticatedRequest, authMiddleware } from "@/apiMiddleware";
 import adminService from "@/domain/admins/services/AdminService";
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
   try {
     // Ensure this endpoint only handles DELETE requests
     if (req.method !== "DELETE") {
       return res.status(405).json({ message: "Method Not Allowed" });
+    }
+
+    // Ensure the request is authenticated
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized" });
     }
 
     // Parse the request body
@@ -27,15 +30,14 @@ export default async function handler(
       : undefined;
 
     // Call the service to delete the admin
-    const result = await adminService.deleteOne({
-      id,
-      refs: normalizedRefs,
-    });
+    const result = await adminService.deleteOne({ id, refs: normalizedRefs });
 
     // Respond with the result
-    res.status(200).json(result);
-  } catch (error) {
+    return res.status(200).json(result);
+  } catch (error: any) {
     console.error("Error deleting admin:", error);
-    res.status(500).json({ message: "Internal Server Error", error });
+    return res.status(500).json({ message: "Internal Server Error", error });
   }
-}
+};
+
+export default authMiddleware(handler);
