@@ -10,9 +10,10 @@ import { isTokenExpired } from "@/common/utils/tokenVerifier";
 import { refreshAccessToken } from "@/common/utils/tokenRefresher";
 import { retrieveTokenPayload } from "@/common/utils/tokenDecoder";
 import { MenuIcon } from "lucide-react";
+import { User } from "../../../../types/auth";
 
 interface Props {
-  user: AuthenticatedUser;
+  user: User | null;
   section: SectionName;
   children?: ReactNode;
 }
@@ -40,9 +41,9 @@ export const Main: FC<Props> = ({ user, section, children }) => {
     return () => clearInterval(redirection);
   }, [accessToken, authenticatedUser]);
 
-  useEffect(() => {
-    refreshAccessToken(refreshToken ?? "");
-  }, [isExpired, refreshToken]);
+  // useEffect(() => {
+  //   refreshAccessToken(refreshToken ?? "");
+  // }, [isExpired, refreshToken]);
 
   return (
     <>
@@ -101,24 +102,37 @@ export const Main: FC<Props> = ({ user, section, children }) => {
         </aside>
 
         {/* Main Content */}
-        <main className="w-full flex flex-col gap-10 py-14 px-5 md:px-10 lg:px-24">
-          <div className="flex flex-row items-center gap-4 justify-between">
+        <main
+          className="w-full min-h-screen flex flex-col 
+  px-4 sm:px-6 md:px-10 lg:px-24 
+  py-6 md:py-10 lg:py-14 
+  overflow-hidden"
+        >
+          <div className="w-full flex flex-row items-center justify-between mb-6 md:mb-10">
             <button
-              className="flex z-0 p-3 bg-secondary text-white rounded-full shadow-lg lg:hidden"
+              className="lg:hidden p-2 rounded-full bg-secondary text-white 
+        flex items-center justify-center 
+        shadow-md hover:bg-secondary/90 
+        transition-colors duration-300"
               onClick={() => setIsSidebarOpen((prev) => !prev)}
             >
-              <MenuIcon className="h-4 w-4" />
+              <MenuIcon className="h-5 w-5" />
             </button>
             <TitleBar title={section} userImageSrc={undefined} />
           </div>
+
           <div
-            className="flex-1 py-5 "
-            style={{ maxHeight: "calc(100vh - 8rem)" }} // Adjust height dynamically
+            className="flex-1 overflow-y-auto 
+      scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-secondary/50
+      pr-2"
+            style={{
+              maxHeight: "calc(100vh - 150px)",
+              scrollbarGutter: "stable",
+            }}
           >
             {children}
           </div>
         </main>
-
         {/* Mobile Overlay */}
         {isSidebarOpen && (
           <div

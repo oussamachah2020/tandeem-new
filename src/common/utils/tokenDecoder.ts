@@ -1,28 +1,16 @@
+import { verify } from "jsonwebtoken";
 import { Payload } from "../../../types/auth";
 
-export function retrieveTokenPayload(token: string) {
+export function retrieveTokenPayload(token: string): Payload | null {
   try {
-    if (token) {
-      // Split the token into its parts: header, payload, and signature
-      const parts = token.split(".");
-
-      if (parts.length !== 3) {
-        throw new Error("Invalid token format");
-      }
-
-      // Extract the payload (second part) and decode it
-      const payloadBase64 = parts[1];
-      const payloadJson = atob(
-        payloadBase64.replace(/-/g, "+").replace(/_/g, "/")
-      );
-
-      // Parse the JSON string into an object
-      const payload = JSON.parse(payloadJson);
-
-      return payload as Payload;
+    const payload = verify(token, process.env.JWT_PRIVATE_KEY!) as Payload;
+    if (!payload) {
+      console.error("Verified payload is null or undefined");
+      return null;
     }
+    return payload;
   } catch (error) {
-    console.error("Failed to decode token:", error);
+    console.error("Token verification failed:", error);
     return null;
   }
 }

@@ -7,12 +7,12 @@ import { v4 } from "uuid";
 import mailService from "@/common/services/MailService";
 
 export interface AuthenticatedUser extends AuthUser {
-    id: string
-    name: string
-    email: string
-    role: Role
-    customer: Customer | null
-    employee: Employee | null
+  id: string;
+  name: string;
+  email: string;
+  role: Role;
+  customer: Customer | null;
+  // employee: Employee | null
 }
 
 class AuthService {

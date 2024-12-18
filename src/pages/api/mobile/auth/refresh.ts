@@ -4,7 +4,7 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-const TOKEN_SECRET = process.env.JWT_PUBLIC_KEY!;
+const TOKEN_SECRET = process.env.JWT_PRIVATE_KEY!;
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -22,17 +22,32 @@ export default async function handler(
   try {
     const decoded = verify(refreshToken, TOKEN_SECRET) as JwtPayload;
 
-
-    const user = await prisma.user.findUnique({
+    const employee = await prisma.employee.findUnique({
       where: { id: decoded.id },
+      select: {
+        id: true,
+        role: true,
+        customerId: true,
+        phone: true,
+        user: {
+          select: {
+            email: true,
+          },
+        },
+      },
     });
 
-    if (!user) {
+    if (!employee) {
       return res.status(403).json({ error: "User not found" });
     }
 
     const newAccessToken = sign(
-      { id: user.id, email: user.email },
+      {
+        id: employee.id,
+        phoneNumber: employee.phone,
+        role: employee.role,
+        customerId: employee.customerId,
+      },
       TOKEN_SECRET,
       { expiresIn: "1h" }
     );
