@@ -33,30 +33,38 @@ export default async function handler(
     });
 
     if (existingAccount) {
-      const accessToken = jwt.sign(
-        {
-          id: existingAccount.id,
-          email: existingAccount.email,
-          role: existingAccount.role,
-        },
-        ACCESS_TOKEN_SECRET,
-        { expiresIn: "1h" }
+
+      const isPasswordMatching = await bcrypt.compare(
+        password,
+        existingAccount.password
       );
 
-      const refreshToken = jwt.sign(
-        {
-          id: existingAccount.id,
-          email: existingAccount.email,
-          role: existingAccount.role,
-        },
-        REFRESH_TOKEN_SECRET,
-        { expiresIn: "1d" }
-      );
-      return res.status(200).json({
-        message: "Account valid",
-        accessToken,
-        refreshToken,
-      });
+      if (isPasswordMatching) {
+        const accessToken = jwt.sign(
+          {
+            id: existingAccount.id,
+            email: existingAccount.email,
+            role: existingAccount.role,
+          },
+          ACCESS_TOKEN_SECRET,
+          { expiresIn: "1h" }
+        );
+
+        const refreshToken = jwt.sign(
+          {
+            id: existingAccount.id,
+            email: existingAccount.email,
+            role: existingAccount.role,
+          },
+          REFRESH_TOKEN_SECRET,
+          { expiresIn: "1d" }
+        );
+        return res.status(200).json({
+          message: "Account valid",
+          accessToken,
+          refreshToken,
+        });
+      }
     }
 
     // Hash the password

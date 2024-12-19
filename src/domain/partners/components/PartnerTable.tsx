@@ -42,8 +42,8 @@ const PartnerTable: FC<Props> = ({partners, onUpdate, onClick}) => {
               <ImagePreview imageRef={partner.logo} />
               {partner.name}
             </DatatableValue>
-            <DatatableValue className="truncate">
-              {partner.address}
+            <DatatableValue className="truncate w-[180px]">
+              {partner.address.substring(0, 12)}...{" "}
             </DatatableValue>
             <DatatableValue>
               <Label>{category[partner.category]}</Label>

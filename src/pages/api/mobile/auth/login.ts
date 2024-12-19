@@ -1,6 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import jwt from "jsonwebtoken";
-import { PrismaClient, Role } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcrypt";
+import { md5Hash } from "@/common/utils/functions";
 
 const prisma = new PrismaClient();
 
@@ -8,8 +10,20 @@ const ACCESS_TOKEN_SECRET = process.env.JWT_PRIVATE_KEY!;
 const REFRESH_TOKEN_SECRET = process.env.JWT_PRIVATE_KEY!;
 
 interface LoginBody {
-  phoneNumber: string;
+  phoneNumber?: string;
+  email?: string;
+  password?: string;
 }
+
+const generateTokens = (payload: object) => {
+  const accessToken = jwt.sign(payload, ACCESS_TOKEN_SECRET, {
+    expiresIn: "1h",
+  });
+  const refreshToken = jwt.sign(payload, REFRESH_TOKEN_SECRET, {
+    expiresIn: "1d",
+  });
+  return { accessToken, refreshToken };
+};
 
 export default async function handler(
   req: NextApiRequest,
@@ -19,53 +33,58 @@ export default async function handler(
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { phoneNumber }: LoginBody = req.body;
+  const { phoneNumber, email }: LoginBody = req.body;
 
-  if (!phoneNumber) {
+  if (!phoneNumber && !email) {
     return res
       .status(400)
-      .json({ error: "Phone number and customer ID are required" });
+      .json({ error: "Phone number or email and password are required" });
   }
 
   try {
-    // Check if the employee exists
-    const existingEmployee = await prisma.employee.findFirst({
-      where: {
-        phone: phoneNumber,
-      },
+    let existingEmployee;
+
+    if (phoneNumber) {
+      existingEmployee = await prisma.employee.findFirst({
+        where: { phone: phoneNumber },
+      });
+    } else if (email) {
+      existingEmployee = await prisma.employee.findFirst({
+        where: { user: { email } },
+        include: { user: true },
+      });
+
+      if (existingEmployee) {
+        const rawPassword = md5Hash(email);
+
+        // Compare the bcrypt-hashed password
+        const isPasswordMatching = await bcrypt.compare(
+          rawPassword,
+          existingEmployee.user.password
+        );
+
+        if (!isPasswordMatching) {
+          return res.status(401).json({ error: "Invalid credentials" });
+        }
+      }
+    }
+
+    if (!existingEmployee) {
+      return res.status(404).json({ error: "Employee not found" });
+    }
+
+    const { accessToken, refreshToken } = generateTokens({
+      id: existingEmployee.id,
+      phoneNumber: existingEmployee.phone,
+      role: existingEmployee.role,
+      customerId: existingEmployee.customerId,
     });
 
-    if (existingEmployee) {
-      const accessToken = jwt.sign(
-        {
-          id: existingEmployee.id,
-          phoneNumber: existingEmployee.phone,
-          role: existingEmployee.role,
-          customerId: existingEmployee.customerId,
-        },
-        ACCESS_TOKEN_SECRET,
-        { expiresIn: "1h" }
-      );
-
-      const refreshToken = jwt.sign(
-        {
-          id: existingEmployee.id,
-          phoneNumber: existingEmployee.phone,
-          role: existingEmployee.role,
-          customerId: existingEmployee.customerId,
-        },
-        REFRESH_TOKEN_SECRET,
-        { expiresIn: "1d" }
-      );
-
-      return res.status(200).json({
-        message: existingEmployee
-          ? "Login successful"
-          : "Employee account created successfully",
-        accessToken,
-        refreshToken,
-      });
-    }
+    return res.status(200).json({
+      message: "Login successful",
+      accessToken,
+      refreshToken,
+    });
   } catch (error) {
     console.error("Login Error:", error);
     return res.status(500).json({ error: "Internal Server Error" });
