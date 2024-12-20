@@ -1,24 +1,27 @@
 import {Main} from "@/common/components/global/Main";
 import {SectionName} from "@/common/security/Sections";
-import {GetServerSideProps, GetServerSidePropsResult, NextPage} from "next";
-import {Modal} from "@/common/components/global/Modal";
+import { NextPage } from "next";
+import { Modal } from "@/common/components/global/Modal";
 import PartnerTable from "@/domain/partners/components/PartnerTable";
-import {PartnerCreateForm} from "@/domain/partners/components/PartnerCreateForm";
+import { PartnerCreateForm } from "@/domain/partners/components/PartnerCreateForm";
 import partnerService from "@/domain/partners/services/PartnerService";
 import PartnerDetails from "@/domain/partners/components/PartnerDetails";
 import ActionBar from "@/common/components/global/ActionBar";
 import useSearch from "@/common/hooks/UseSearch";
-import {PartnerUpdateForm} from "@/domain/partners/components/PartnerUpdateForm";
+import { PartnerUpdateForm } from "@/domain/partners/components/PartnerUpdateForm";
 import Filter from "@/common/components/filter/Filter";
 import FilterGroup from "@/common/components/filter/FilterGroup";
 import useFilter from "@/common/hooks/UseFilter";
-import {AuthenticatedUser} from "@/common/services/AuthService";
 import useModal from "@/common/hooks/UseModal";
-import {getToken} from "next-auth/jwt";
-import {labeledContractStatuses, labeledPaymentMethods} from "@/common/utils/statics";
-import {ArrayElement} from "@/common/utils/types";
-import {useStaticValues} from "@/common/context/StaticValuesContext";
+import {
+  labeledContractStatuses,
+  labeledPaymentMethods,
+} from "@/common/utils/statics";
+import { ArrayElement } from "@/common/utils/types";
+import { useStaticValues } from "@/common/context/StaticValuesContext";
 import { useAuthStore } from "@/zustand/auth-store";
+import { useEffect, useState } from "react";
+import { RefreshCcw } from "lucide-react";
 
 interface Props {
   partners: Awaited<ReturnType<typeof partnerService.getAllIncludeOffers>>;
@@ -70,22 +73,56 @@ const data = [
   },
 ];
 
-const Partners: NextPage<Props> = ({ partners }) => {
+const Partners: NextPage<Props> = () => {
   const { label, action, category } = useStaticValues();
   const [, isAddPartnerModalShown, toggleAddPartnerModal] = useModal(false);
   const [partnerToShow, isPartnerModalShown, togglePartnerModal] =
     useModal<ArrayElement<typeof partners>>();
   const [partnerToUpdate, isEditPartnerModalShown, toggleEditPartnerModal] =
     useModal<ArrayElement<typeof partners>>();
-  const { authenticatedUser } = useAuthStore();
+  const { accessToken, authenticatedUser } = useAuthStore();
+  const [partners, setPartners] = useState<any[]>([]);
   const [searchResultedPartners, onSearchInputChange] = useSearch(partners, [
     "name",
     "address",
   ]);
+
   const [filteredPartners, onFilterValueChange] = useFilter(
     searchResultedPartners,
     ["category", "contract.status" as any, "accepts"]
   );
+  const [loading, setLoading] = useState<boolean>(true);
+
+  const fetchPartners = async () => {
+    setLoading(true);
+
+    try {
+      const response = await fetch("/api/partners/read", {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      if (!response.ok) throw new Error("Failed to fetch customers.");
+      const data = await response.json();
+      setPartners(data);
+    } catch (err: any) {
+      console.error(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPartners();
+  }, [authenticatedUser]);
+
+  if (loading) {
+    return (
+      <div className="h-screen flex justify-center items-center w-full bg-white">
+        <RefreshCcw className="h-10 w-10 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <>
@@ -120,7 +157,7 @@ const Partners: NextPage<Props> = ({ partners }) => {
           />
         </FilterGroup>
         <PartnerTable
-          partners={data}
+          partners={filteredPartners}
           onClick={(partner: any) => togglePartnerModal(true, partner)}
           onUpdate={(partner: any) => toggleEditPartnerModal(true, partner)}
         />
@@ -130,7 +167,7 @@ const Partners: NextPage<Props> = ({ partners }) => {
         isShown={isAddPartnerModalShown}
         onClose={() => toggleAddPartnerModal(false)}
       >
-        <PartnerCreateForm />
+        <PartnerCreateForm onClose={() => toggleAddPartnerModal(false)} />
       </Modal>
       <Modal
         title={action.partnerUpdate}

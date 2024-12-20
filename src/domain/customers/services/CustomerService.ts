@@ -41,8 +41,6 @@ class CustomerService {
     console.log(customerDto);
     const rawPassword = md5Hash(customerDto.email);
     const password = await hash(rawPassword, 12);
-    // // const logo = await fileService.save('logo', customerDto.logo);
-    // // const contractScan = await fileService.save('contract', customerDto.contractScan);
     await prisma.customer.create({
       data: {
         name: customerDto.name,
@@ -75,18 +73,18 @@ class CustomerService {
       },
     });
 
-    await mailService.sendAccountDetails(
-      { name: customerDto.name, address: customerDto.email },
-      rawPassword
-    );
+    // await mailService.sendAccountDetails(
+    //   { name: customerDto.name, address: customerDto.email },
+    //   rawPassword
+    // );
     return "customerAddedSuccess";
   };
 
   async updateOne(
-    editCustomerDto: CustomerUpdateDto & CustomerUpdateFilesDto
+    editCustomerDto: CustomerUpdateDto
   ): Promise<keyof typeof staticValues.notification> {
-    if (editCustomerDto.logo)
-      await fileService.replace(editCustomerDto.logoRef, editCustomerDto.logo);
+    // if (editCustomerDto.logo)
+    //   await fileService.replace(editCustomerDto.logoRef, editCustomerDto.logo);
     await prisma.customer.update({
       data: {
         name: editCustomerDto.name,
@@ -118,8 +116,8 @@ class CustomerService {
       },
     });
     if (!customer) return "customerNotFound";
-    await fileService.delete(customer.logo);
-    await fileService.delete(customer.contract.scan);
+    // await fileService.delete(customer.logo);
+    // await fileService.delete(customer.contract.scan);
     await prisma.$transaction([
       prisma.customer.delete({ where: { id } }),
       prisma.representative.delete({

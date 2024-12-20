@@ -16,13 +16,13 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
       where: {
         id: user?.id,
       },
-      select: {
-        customerId: true,
+      include: {
+        customer: true,
       },
     });
 
     // Ensure user and user.customer.id are available
-    if (!user || !existingUser?.customerId) {
+    if (!user) {
       return res
         .status(401)
         .json({ message: "Unauthorized: Missing user or customer ID" });
@@ -30,14 +30,15 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
 
     const body = req.body; // The Admin creation DTO data from the request body
 
+    console.log(body, existingUser);
+
     // Add the new admin, attaching the user’s customerId
-    const newAdmin = await adminService.addOne({
+    await adminService.addOne({
       ...body,
-      customerId: existingUser?.customerId,
     });
 
     // Respond with the created admin data
-    return res.status(201).json(newAdmin);
+    return res.status(201).json({ message: "Admin created" });
   } catch (error: any) {
     console.error("Error creating admin:", error);
     return res

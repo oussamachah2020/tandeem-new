@@ -6,6 +6,7 @@ import {useState} from "react";
 import NotificationsContext from "@/common/context/NotificationsContext";
 import Notification from "@/common/components/global/Notification";
 import staticValues from "@/common/context/StaticValues";
+import { Toaster } from "react-hot-toast";
 
 const poppins = Poppins({
     subsets: ["latin"],
@@ -16,25 +17,36 @@ const poppins = Poppins({
 const App = ({Component, pageProps}: AppProps) => {
     const notificationKeyState = useState<keyof typeof staticValues.notification | null>(null)
     return (
-        <>
-            <Head>
-                <title>tandeem</title>
-                <meta
-                    name='description'
-                    content='La plateforme qui vous permet de personnaliser les avantages de vos collaborateurs.'
-                />
-                <meta name='viewport'
-                      content='width=device-width, initial-scale=1.0, maximum-scale=1.0,user-scalable=0'/>
-                <link rel="icon" href="/img/logo-white-1.svg" media="(prefers-color-scheme: dark)"/>
-                <link rel="icon" href="/img/logo-blue-1.svg" media="(prefers-color-scheme: light)"/>
-            </Head>
-            <NotificationsContext.Provider value={notificationKeyState}>
-                <div className={`${poppins.variable} font-primary`}>
-                    <Component {...pageProps} />
-                </div>
-                <Notification/>
-            </NotificationsContext.Provider>
-        </>
+      <>
+        <Head>
+          <title>tandeem</title>
+          <meta
+            name="description"
+            content="La plateforme qui vous permet de personnaliser les avantages de vos collaborateurs."
+          />
+          <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0, maximum-scale=1.0,user-scalable=0"
+          />
+          <link
+            rel="icon"
+            href="/img/logo-white-1.svg"
+            media="(prefers-color-scheme: dark)"
+          />
+          <link
+            rel="icon"
+            href="/img/logo-blue-1.svg"
+            media="(prefers-color-scheme: light)"
+          />
+        </Head>
+        <NotificationsContext.Provider value={notificationKeyState}>
+          <div className={`${poppins.variable} font-primary`}>
+            <Toaster />
+            <Component {...pageProps} />
+          </div>
+          <Notification />
+        </NotificationsContext.Provider>
+      </>
     );
 }
 

@@ -24,15 +24,15 @@ class AdminService {
     });
 
   async addOne(
-    adminDto: AdminCreateDto & AdminCreateFilesDto
+    adminDto: AdminCreateDto
   ): Promise<keyof typeof staticValues.notification> {
-    const photoRef = await fileService.save("admins", adminDto.photo);
     const rawPassword = md5Hash(adminDto.email);
     const password = await hash(rawPassword, 12);
+
     await prisma.admin.create({
       data: {
         name: adminDto.name,
-        photo: photoRef,
+        photo: adminDto.photoUrl,
         user: {
           create: {
             email: adminDto.email,
@@ -45,6 +45,7 @@ class AdminService {
         },
       },
     });
+
     mailService
       .sendAccountDetails(
         { name: adminDto.name, address: adminDto.email },

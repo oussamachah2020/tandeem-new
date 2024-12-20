@@ -14,6 +14,8 @@ export interface PartnerCreateDto {
   representativeEmail: string;
   representativePhone: string;
   accepts: PaymentMethod;
+  scanUrl: string;
+  logoUrl: string;
 }
 
 export interface PartnerCreateFilesDto {

@@ -83,9 +83,9 @@ const CustomerTable: FC<Props> = ({ customers, onUpdate, onClick }) => {
         label.category,
         label.contract,
       ]}
-      isEmpty={MOCK_CUSTOMERS.length === 0}
+      isEmpty={customers.length === 0}
     >
-      {MOCK_CUSTOMERS.map((customer, idx) => (
+      {customers.map((customer, idx) => (
         <DatatableRow
           key={idx}
           onClick={() => onClick(customer)}
@@ -102,10 +102,10 @@ const CustomerTable: FC<Props> = ({ customers, onUpdate, onClick }) => {
           </DatatableValue>
           <DatatableValue>{customer.address}</DatatableValue>
           <DatatableValue>
-            {/* <Label>{category[customer.category]}</Label> */}
+            <Label>{category[customer.category]}</Label>
           </DatatableValue>
           <DatatableValue>
-            <ContractStatus status={"Active"} />
+            <ContractStatus status={customer.contract.status} />
           </DatatableValue>
         </DatatableRow>
       ))}

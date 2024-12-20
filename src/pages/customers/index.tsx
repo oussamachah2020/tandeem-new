@@ -17,10 +17,11 @@ import { labeledContractStatuses } from "@/common/utils/statics";
 import { ArrayElement } from "@/common/utils/types";
 import { useStaticValues } from "@/common/context/StaticValuesContext";
 import { useAuthStore } from "@/zustand/auth-store";
+import { RefreshCcw } from "lucide-react";
 
 const Customers: NextPage = () => {
   const { category, action, label } = useStaticValues();
-  const { authenticatedUser } = useAuthStore();
+  const { authenticatedUser, accessToken } = useAuthStore();
   const [, isAddCustomerModalShown, toggleAddCustomerModal] = useModal(false);
   const [customerToShow, isCustomerModalShown, toggleCustomerModal] =
     useModal<any>();
@@ -41,22 +42,36 @@ const Customers: NextPage = () => {
   );
 
   // Fetch customers data from an API endpoint
-  useEffect(() => {
-    const fetchCustomers = async () => {
-      try {
-        const response = await fetch("/api/customers/read");
-        if (!response.ok) throw new Error("Failed to fetch customers.");
-        const data = await response.json();
-        setCustomers(data);
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchCustomers = async () => {
+    setLoading(true);
 
+    try {
+      const response = await fetch("/api/customers/read", {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      if (!response.ok) throw new Error("Failed to fetch customers.");
+      const data = await response.json();
+      setCustomers(data);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchCustomers();
   }, [authenticatedUser]);
+
+  if (loading) {
+    return (
+      <div className="h-screen flex justify-center items-center w-full bg-white">
+        <RefreshCcw className="h-10 w-10 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <>
@@ -95,7 +110,7 @@ const Customers: NextPage = () => {
         isShown={isAddCustomerModalShown}
         onClose={() => toggleAddCustomerModal(false)}
       >
-        <CustomerCreateForm />
+        <CustomerCreateForm onClose={() => toggleAddCustomerModal(false)} />
       </Modal>
       <Modal
         title={action.customerUpdate}

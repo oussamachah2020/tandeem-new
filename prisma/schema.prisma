@@ -259,6 +259,14 @@ model IdeaBox {
   @@map("idea_box")
 }
 
+model Categories {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String
+  partnerId   String   @db.Uuid
+
+  @@map("categories")
+}
+
 enum PaymentMethod {
   Card
   Coupon

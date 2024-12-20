@@ -14,14 +14,14 @@ interface Props {
     onUpdate: (admin: ArrayElement<Awaited<ReturnType<typeof adminService.getAll>>>) => void
 }
 
-const AdminTable: FC<Props> = ({ admins = [], onUpdate }) => {
+const AdminTable: FC<Props> = ({ admins, onUpdate }) => {
   const { label, action, confirmation, tooltip } = useStaticValues();
   return (
     <Datatable
-      isEmpty={admins.length === 0}
+      isEmpty={admins?.length === 0}
       headers={[label.name, label.email, label.status]}
     >
-      {admins.map((admin, idx) => (
+      {admins?.map((admin, idx) => (
         <DatatableRow
           key={idx}
           onUpdate={() => onUpdate(admin)}

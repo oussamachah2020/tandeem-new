@@ -7,8 +7,6 @@ import Link from "@/common/components/atomic/Link";
 import { useAuthStore } from "@/zustand/auth-store";
 import { useRouter } from "next/navigation";
 import { isTokenExpired } from "@/common/utils/tokenVerifier";
-import { refreshAccessToken } from "@/common/utils/tokenRefresher";
-import { retrieveTokenPayload } from "@/common/utils/tokenDecoder";
 import { MenuIcon } from "lucide-react";
 import { User } from "../../../../types/auth";
 
@@ -19,7 +17,8 @@ interface Props {
 }
 
 export const Main: FC<Props> = ({ user, section, children }) => {
-  const { accessToken, refreshToken, authenticatedUser } = useAuthStore();
+  const { accessToken, refreshToken, authenticatedUser, setTokens } =
+    useAuthStore();
   const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const isExpired = isTokenExpired(accessToken);
@@ -31,6 +30,27 @@ export const Main: FC<Props> = ({ user, section, children }) => {
     }
   }, [authenticatedUser, authenticatedUser?.role]);
 
+  const refreshAccessToken = async (refreshToken: string) => {
+    if (!refreshToken) {
+      console.error("Refresh token is missing. Cannot refresh access token.");
+      return;
+    }
+    try {
+      const response = await fetch("/api/auth/refresh", {
+        method: "POST",
+        headers: { "Content-Type": "Application/json" },
+        body: JSON.stringify({ refreshToken }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setTokens(data?.accessToken ?? "", "");
+      }
+    } catch (error) {
+      console.error("Error refreshing access token:", error);
+    }
+  };
+
   useEffect(() => {
     const redirection = setInterval(() => {
       if (!accessToken && !authenticatedUser) {
@@ -41,9 +61,11 @@ export const Main: FC<Props> = ({ user, section, children }) => {
     return () => clearInterval(redirection);
   }, [accessToken, authenticatedUser]);
 
-  // useEffect(() => {
-  //   refreshAccessToken(refreshToken ?? "");
-  // }, [isExpired, refreshToken]);
+  useEffect(() => {
+    if (isExpired) {
+      refreshAccessToken(refreshToken ?? "");
+    }
+  }, [isExpired, refreshToken]);
 
   return (
     <>

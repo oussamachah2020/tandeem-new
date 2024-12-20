@@ -21,4 +21,5 @@ export interface Payload {
   role: Role;
   exp: number;
   iat: number;
+  customer: Customer;
 }

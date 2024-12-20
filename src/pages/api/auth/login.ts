@@ -30,10 +30,10 @@ export default async function handler(
   try {
     const existingAccount = await prisma.user.findUnique({
       where: { email },
+      include: { customer: true },
     });
 
     if (existingAccount) {
-
       const isPasswordMatching = await bcrypt.compare(
         password,
         existingAccount.password
@@ -45,6 +45,7 @@ export default async function handler(
             id: existingAccount.id,
             email: existingAccount.email,
             role: existingAccount.role,
+            customer: existingAccount.customer,
           },
           ACCESS_TOKEN_SECRET,
           { expiresIn: "1h" }
@@ -64,6 +65,8 @@ export default async function handler(
           accessToken,
           refreshToken,
         });
+      } else {
+        return res.status(404).json({ message: "Invalid credentials" });
       }
     }
 

@@ -6,23 +6,14 @@ import partnerService from "@/domain/partners/services/PartnerService";
 const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
   try {
     // Ensure this endpoint only handles POST requests
-    if (req.method !== "POST") {
+    if (req.method !== "GET") {
       return res.status(405).json({ message: "Method Not Allowed" });
     }
 
-    // Extract the partner creation DTO from the request body
-    const partnerDto: PartnerCreateDto = req.body;
-
-    // Validate the input data (optional but recommended)
-    if (!partnerDto) {
-      return res.status(400).json({ message: "Missing required fields" });
-    }
-
-    // Add the partner using the service
-    const result = await partnerService.addOne({ ...partnerDto });
+    const partners = await partnerService.getAll();
 
     // Respond with the created partner data
-    return res.status(201).json(result);
+    return res.status(200).json(partners);
   } catch (error: any) {
     console.error("Error in Partner API:", error);
     return res

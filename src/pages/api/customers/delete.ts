@@ -11,7 +11,8 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
     return res.status(401).json({ error: "Unauthorized" });
   }
 
-  const { id } = req.body as { id: string };
+  const { id } = req.body;
+
 
   try {
     const deletedCustomer = await customerService.deleteOne(id);
