@@ -1,5 +1,4 @@
 import { NextApiResponse } from "next";
-import { PrismaClient } from "@prisma/client";
 import { AuthenticatedRequest, authMiddleware } from "@/apiMiddleware"; // Adjust path as necessary
 import customerService from "@/domain/customers/services/CustomerService";
 

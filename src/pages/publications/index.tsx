@@ -16,10 +16,13 @@ import useFilter from "@/common/hooks/UseFilter";
 import FilterGroup from "@/common/components/filter/FilterGroup";
 import Filter from "@/common/components/filter/Filter";
 import {ArrayElement} from "@/common/utils/types";
+import { useAuthStore } from "@/zustand/auth-store";
+import { useEffect, useState } from "react";
+import { RefreshCcw } from "lucide-react";
 
 interface Props {
-    user: AuthenticatedUser
-    publications: Awaited<ReturnType<typeof publicationService.getAll>>
+  user: AuthenticatedUser;
+  publications: Awaited<ReturnType<typeof publicationService.getAll>>;
 }
 
 const MOCK_PUBS = [
@@ -91,7 +94,7 @@ const MOCK_PUBS = [
   },
 ];
 
-const Publications: NextPage<Props> = ({ user, publications }) => {
+const Publications: NextPage<Props> = ({}) => {
   const [, isPublicationCreateModalShown, togglePublicationCreateModal] =
     useModal(false);
   const [
@@ -99,17 +102,46 @@ const Publications: NextPage<Props> = ({ user, publications }) => {
     isPublicationUpdateModalShown,
     togglePublicationUpdateModal,
   ] = useModal<ArrayElement<typeof publications>>();
+  const { authenticatedUser, accessToken } = useAuthStore();
+  const [publications, setPublications] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
   const [searchResultedPublications, onSearchInputChange] = useSearch<
     ArrayElement<typeof publications>
   >(publications, ["title"]);
+
   const [filteredPublications, onFilterValueChange] = useFilter<
     ArrayElement<typeof publications>
   >(searchResultedPublications, ["pinned"]);
 
+  // Fetch customers data from an API endpoint
+  const fetchCustomers = async () => {
+    setLoading(true);
+
+    try {
+      const response = await fetch("/api/publications/read", {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      if (!response.ok) throw new Error("Failed to fetch customers.");
+      const data = await response.json();
+      console.log(data);
+      setPublications(data);
+    } catch (err: any) {
+      console.error(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCustomers();
+  }, [authenticatedUser]);
+
   return (
     <>
-      <Main section={SectionName.Publications} user={user}>
+      <Main section={SectionName.Publications} user={authenticatedUser}>
         <ActionBar
           action={{
             text: "Ajouter une publication",
@@ -129,20 +161,28 @@ const Publications: NextPage<Props> = ({ user, publications }) => {
           />
         </FilterGroup>
         <div className="h-[38rem] overflow-y-auto pb-10">
-          {MOCK_PUBS.length > 0 ? (
-            <div className="grid overflow-y-auto grid-cols-1 lg:grid-cols-2 gap-4">
-              {MOCK_PUBS.map((publication, idx) => (
-                <PublicationCard
-                  key={idx}
-                  publication={publication}
-                  onUpdate={() =>
-                    togglePublicationUpdateModal(true, publication)
-                  }
-                />
-              ))}
+          {loading ? (
+            <div className="h-40 flex justify-center items-center w-full bg-white">
+              <RefreshCcw className="h-10 w-10 animate-spin text-primary" />
             </div>
           ) : (
-            <EmptyContent />
+            <>
+              {filteredPublications?.length > 0 ? (
+                <div className="grid overflow-y-auto grid-cols-1 lg:grid-cols-2 gap-4">
+                  {filteredPublications?.map((publication, idx) => (
+                    <PublicationCard
+                      key={idx}
+                      publication={publication}
+                      onUpdate={() =>
+                        togglePublicationUpdateModal(true, publication)
+                      }
+                    />
+                  ))}
+                </div>
+              ) : (
+                <EmptyContent />
+              )}
+            </>
           )}
         </div>
       </Main>
@@ -151,33 +191,23 @@ const Publications: NextPage<Props> = ({ user, publications }) => {
         isShown={isPublicationCreateModalShown}
         onClose={() => togglePublicationCreateModal(false)}
       >
-        <PublicationCreateForm />
+        <PublicationCreateForm
+          onClose={() => togglePublicationCreateModal(false)}
+        />
       </Modal>
       <Modal
         title="Modifier la publication"
         isShown={isPublicationUpdateModalShown}
         onClose={() => togglePublicationUpdateModal(false)}
       >
-        <PublicationUpdateForm publication={publicationToUpdate} />
+        <PublicationUpdateForm
+          onClose={() => togglePublicationUpdateModal(false)}
+          publication={publicationToUpdate}
+        />
       </Modal>
     </>
   );
 };
 
-
-// export const getServerSideProps: GetServerSideProps = async (context) => {
-//     const user = (await getToken(context)) as unknown as AuthenticatedUser
-
-//     const publications = await publicationService.getAll(user.customer?.id);
-
-//     const result: GetServerSidePropsResult<Props> = {
-//         props: {
-//             user: JSON.parse(JSON.stringify(user)),
-//             publications: JSON.parse(JSON.stringify(publications))
-//         }
-//     }
-
-//     return result
-// }
 
 export default Publications;

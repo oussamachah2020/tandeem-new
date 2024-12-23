@@ -55,9 +55,8 @@ class PartnerService {
     return "partnerAddedSuccess";
   };
 
-  async updateOne(editPartnerDto: PartnerUpdateDto & PartnerUpdateFilesDto) {
-    if (editPartnerDto.logo)
-      await fileService.replace(editPartnerDto.logoRef, editPartnerDto.logo);
+  async updateOne(editPartnerDto: PartnerUpdateDto) {
+    // await fileService.replace(editPartnerDto.logoRef, editPartnerDto.logo);
     await prisma.partner.update({
       data: {
         name: editPartnerDto.name,
@@ -65,6 +64,7 @@ class PartnerService {
         website: editPartnerDto.website,
         category: editPartnerDto.category,
         accepts: editPartnerDto.accepts,
+        logo: editPartnerDto.logoUrl,
         representative: {
           update: {
             fullName: editPartnerDto.representativeName,

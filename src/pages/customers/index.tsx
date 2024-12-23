@@ -14,7 +14,6 @@ import Filter from "@/common/components/filter/Filter";
 import useFilter from "@/common/hooks/UseFilter";
 import useModal from "@/common/hooks/UseModal";
 import { labeledContractStatuses } from "@/common/utils/statics";
-import { ArrayElement } from "@/common/utils/types";
 import { useStaticValues } from "@/common/context/StaticValuesContext";
 import { useAuthStore } from "@/zustand/auth-store";
 import { RefreshCcw } from "lucide-react";
@@ -53,6 +52,7 @@ const Customers: NextPage = () => {
       });
       if (!response.ok) throw new Error("Failed to fetch customers.");
       const data = await response.json();
+      console.log(data);
       setCustomers(data);
     } catch (err: any) {
       setError(err.message);
@@ -64,14 +64,6 @@ const Customers: NextPage = () => {
   useEffect(() => {
     fetchCustomers();
   }, [authenticatedUser]);
-
-  if (loading) {
-    return (
-      <div className="h-screen flex justify-center items-center w-full bg-white">
-        <RefreshCcw className="h-10 w-10 animate-spin text-primary" />
-      </div>
-    );
-  }
 
   return (
     <>
@@ -99,11 +91,19 @@ const Customers: NextPage = () => {
             }
           />
         </FilterGroup>
-        <CustomerTable
-          customers={filteredCustomers}
-          onClick={(customer: any) => toggleCustomerModal(true, customer)}
-          onUpdate={(customer: any) => toggleEditCustomerModal(true, customer)}
-        />
+        {loading ? (
+          <div className="h-40 flex justify-center items-center w-full bg-white">
+            <RefreshCcw className="h-10 w-10 animate-spin text-primary" />
+          </div>
+        ) : (
+          <CustomerTable
+            customers={filteredCustomers}
+            onClick={(customer: any) => toggleCustomerModal(true, customer)}
+            onUpdate={(customer: any) =>
+              toggleEditCustomerModal(true, customer)
+            }
+          />
+        )}
       </Main>
       <Modal
         title={action.customerAdd}
@@ -117,7 +117,12 @@ const Customers: NextPage = () => {
         isShown={isEditCustomerModalShown}
         onClose={() => toggleEditCustomerModal(false)}
       >
-        {customerToUpdate && <CustomerUpdateForm customer={customerToUpdate} />}
+        {customerToUpdate && (
+          <CustomerUpdateForm
+            onClose={() => toggleEditCustomerModal(false)}
+            customer={customerToUpdate}
+          />
+        )}
       </Modal>
       <Modal
         title={action.customerDetail}

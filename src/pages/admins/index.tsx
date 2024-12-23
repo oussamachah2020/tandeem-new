@@ -62,13 +62,6 @@ const Admins: NextPage<Props> = () => {
     fetchAdmins();
   }, [authenticatedUser]);
 
-  if (loading) {
-    return (
-      <div className="h-screen flex justify-center items-center w-full bg-white">
-        <RefreshCcw className="h-10 w-10 animate-spin text-primary" />
-      </div>
-    );
-  }
 
   return (
     <Main section={SectionName.Admins} user={authenticatedUser}>
@@ -92,10 +85,16 @@ const Admins: NextPage<Props> = () => {
           }
         />
       </FilterGroup>
-      <AdminTable
-        admins={filteredResults}
-        onUpdate={(admin) => toggleAdminUpdateModal(true, admin)}
-      />
+      {loading ? (
+        <div className="h-40 flex justify-center items-center w-full bg-white">
+          <RefreshCcw className="h-10 w-10 animate-spin text-primary" />
+        </div>
+      ) : (
+        <AdminTable
+          admins={filteredResults}
+          onUpdate={(admin) => toggleAdminUpdateModal(true, admin)}
+        />
+      )}
       <Modal
         title={action.adminAdd}
         isShown={isAddAdminModalShown}

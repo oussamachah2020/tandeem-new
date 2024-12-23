@@ -1,17 +1,28 @@
-import {NextApiRequest, NextApiResponse} from "next";
-import {handle} from "@/apiMiddleware";
-import {CustomerUpdateFilesDto} from "@/domain/customers/dtos/CustomerUpdateDto";
-import {PartnerUpdateDto} from "@/domain/partners/dtos/PartnerUpdateDto";
+import { NextApiRequest, NextApiResponse } from "next";
+import { PartnerUpdateDto } from "@/domain/partners/dtos/PartnerUpdateDto";
 import partnerService from "@/domain/partners/services/PartnerService";
+import { AuthenticatedRequest, authMiddleware } from "@/apiMiddleware";
 
-export default async (req: NextApiRequest, res: NextApiResponse) =>
-    handle<PartnerUpdateDto, CustomerUpdateFilesDto>(req, res, async (payload) => {
-        const {body: editContractorDto, files: {logo}} = payload
-        return await partnerService.updateOne({...editContractorDto, logo})
-    }, ['logo'])
+const updatePartnerHandler = async (
+  req: AuthenticatedRequest,
+  res: NextApiResponse
+) => {
+  if (req.method !== "PUT") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
 
-export const config = {
-    api: {
-        bodyParser: false,
-    },
+  try {
+    const partner: PartnerUpdateDto = req.body;
+    console.log(partner);
+
+    // Update the partner using the service
+    const updatedPartner = await partnerService.updateOne({ ...partner });
+
+    return res.status(200).json(updatedPartner);
+  } catch (error) {
+    console.error("Error updating partner:", error);
+    return res.status(500).json({ error: "Failed to update partner" });
+  }
 };
+
+export default authMiddleware(updatePartnerHandler);

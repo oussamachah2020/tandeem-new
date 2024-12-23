@@ -44,7 +44,7 @@ export const Main: FC<Props> = ({ user, section, children }) => {
 
       if (response.ok) {
         const data = await response.json();
-        setTokens(data?.accessToken ?? "", "");
+        setTokens(data?.accessToken ?? "", refreshToken);
       }
     } catch (error) {
       console.error("Error refreshing access token:", error);

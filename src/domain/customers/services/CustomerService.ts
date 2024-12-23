@@ -14,6 +14,11 @@ class CustomerService {
       include: {
         representative: true,
         contract: true,
+        employees: {
+          select: {
+            _count: true,
+          },
+        },
         users: {
           select: { email: true },
           where: { role: Role.CUSTOMER },

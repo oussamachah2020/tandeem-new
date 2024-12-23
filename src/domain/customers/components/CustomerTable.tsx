@@ -14,64 +14,6 @@ interface Props {
     onUpdate: (customer: any) => void
 }
 
-const MOCK_CUSTOMERS = [
-  {
-    id: 1,
-    logo: "https://via.placeholder.com/40", // Mock logo URL
-    name: "Tech Solutions Inc.",
-    address: "123 Tech Street, Silicon Valley, CA",
-    category: "technology",
-    contract: { status: "active", duration: "12-month" },
-  },
-  {
-    id: 2,
-    logo: "https://via.placeholder.com/40",
-    name: "Green Farms Co.",
-    address: "456 Greenway Drive, Austin, TX",
-    category: "agriculture",
-    contract: { status: "expired", duration: "6-month" },
-  },
-  {
-    id: 3,
-    logo: "https://via.placeholder.com/40",
-    name: "HealthFirst Clinics",
-    address: "789 Wellness Ave, Miami, FL",
-    category: "healthcare",
-    contract: { status: "active", duration: "24-month" },
-  },
-  {
-    id: 4,
-    logo: "https://via.placeholder.com/40",
-    name: "EduSpark Academy",
-    address: "101 Knowledge Lane, Boston, MA",
-    category: "education",
-    contract: { status: "active", duration: "18-month" },
-  },
-  {
-    id: 5,
-    logo: "https://via.placeholder.com/40",
-    name: "UrbanStyle Architects",
-    address: "202 Design Blvd, Chicago, IL",
-    category: "architecture",
-    contract: { status: "pending", duration: "12-month" },
-  },
-  {
-    id: 6,
-    logo: "https://via.placeholder.com/40",
-    name: "AutoDrive Motors",
-    address: "303 Engine Road, Detroit, MI",
-    category: "automotive",
-    contract: { status: "active", duration: "36-month" },
-  },
-  {
-    id: 7,
-    logo: "https://via.placeholder.com/40",
-    name: "Culinary Creations",
-    address: "404 Foodie St, New Orleans, LA",
-    category: "hospitality",
-    contract: { status: "trial", duration: "1-month" },
-  },
-];
 
 const CustomerTable: FC<Props> = ({ customers, onUpdate, onClick }) => {
   const { label, category, confirmation } = useStaticValues();

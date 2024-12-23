@@ -48,7 +48,7 @@ export default async function handler(
             customer: existingAccount.customer,
           },
           ACCESS_TOKEN_SECRET,
-          { expiresIn: "1h" }
+          { expiresIn: "1d" }
         );
 
         const refreshToken = jwt.sign(

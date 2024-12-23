@@ -4,6 +4,7 @@ import Form from "@/common/components/global/Form";
 import { useStaticValues } from "@/common/context/StaticValuesContext";
 import Button from "@/common/components/atomic/Button";
 import { useAuthStore } from "@/zustand/auth-store";
+import toast from "react-hot-toast";
 
 type Props = {
   onClose: () => void;
@@ -64,7 +65,7 @@ export const PartnerCreateForm = ({ onClose }: Props) => {
 
       if (response.ok) {
         const result = await response.json();
-        console.log("Success:", result);
+        toast.success("Partenaire ajouté avec succès");
         onClose();
         reset();
       } else {

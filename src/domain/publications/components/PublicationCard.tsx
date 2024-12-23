@@ -13,9 +13,17 @@ interface Props {
 }
 
 const PublicationCard: FC<Props> = ({ publication, onUpdate }) => (
-  <div className="flex flex-col h-[38rem] gap-6 bg-white rounded-xl p-6 shadow-lg border border-gray-200">
+  <div className="flex flex-col h-full gap-6 bg-white rounded-xl p-6 shadow-lg border border-gray-200">
     <div className="col-span-2 flex flex-col gap-5">
-      <img className="border rounded-md" src={publication.photo} alt="photo" />
+      <img
+        className="border rounded-md"
+        src={
+          publication?.photo === ""
+            ? "https://www.angiil.com/wp-content/uploads/2021/11/Pub-e1637242285887.png"
+            : publication.photo
+        }
+        alt="photo"
+      />
       {/* <ImagePreview
         imageRef={publication.photo}
         width="w-full"
