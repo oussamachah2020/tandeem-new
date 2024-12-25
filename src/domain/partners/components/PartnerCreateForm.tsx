@@ -53,6 +53,8 @@ export const PartnerCreateForm = ({ onClose }: Props) => {
       representativeEmail: data.representativeEmail,
     };
 
+    toast.loading("Un moment...", { id: "create" });
+
     try {
       const response = await fetch("/api/partners/create", {
         method: "POST",
@@ -64,10 +66,9 @@ export const PartnerCreateForm = ({ onClose }: Props) => {
       });
 
       if (response.ok) {
-        const result = await response.json();
-        toast.success("Partenaire ajouté avec succès");
         onClose();
         reset();
+        toast.success("Partenaire créé avec succès");
       } else {
         const responseText = await response.text();
         console.error("Error status:", response.status);
@@ -75,6 +76,8 @@ export const PartnerCreateForm = ({ onClose }: Props) => {
       }
     } catch (error) {
       console.error("Error:", error);
+    } finally {
+      toast.dismiss("create");
     }
   };
 
@@ -276,7 +279,7 @@ export const PartnerCreateForm = ({ onClose }: Props) => {
       <Button
         type="submit"
         icon={"PlusIcon"}
-        text="Ajouter"
+        text={"Ajouter"}
         className="w-full mt-5"
       />
     </form>

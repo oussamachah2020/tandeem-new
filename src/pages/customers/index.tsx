@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Main } from "@/common/components/global/Main";
 import { SectionName } from "@/common/security/Sections";
-import { NextPage } from "next";
 import { Modal } from "@/common/components/global/Modal";
 import { CustomerCreateForm } from "@/domain/customers/components/CustomerCreateForm";
 import CustomerTable from "@/domain/customers/components/CustomerTable";
@@ -18,7 +17,7 @@ import { useStaticValues } from "@/common/context/StaticValuesContext";
 import { useAuthStore } from "@/zustand/auth-store";
 import { RefreshCcw } from "lucide-react";
 
-const Customers: NextPage = () => {
+const Customers = () => {
   const { category, action, label } = useStaticValues();
   const { authenticatedUser, accessToken } = useAuthStore();
   const [, isAddCustomerModalShown, toggleAddCustomerModal] = useModal(false);

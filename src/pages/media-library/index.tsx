@@ -13,17 +13,17 @@ import MediaLibraryTable from "@/domain/media-library/components/MediaLibraryTab
 import MediaForm from "@/domain/media-library/components/MediaForm";
 import {getRoleLevel} from "@/common/utils/functions";
 import { useAuthStore } from "@/zustand/auth-store";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { RefreshCcw } from "lucide-react";
 
 interface Props {
-    user: AuthenticatedUser;
-    mediaLibrary: Awaited<ReturnType<typeof mediaLibraryService.getAll>>
+  user: AuthenticatedUser;
+  mediaLibrary: Awaited<ReturnType<typeof mediaLibraryService.getAll>>;
 }
 
-
-
-const MediaLibrary: NextPage<Props> = ({ user, mediaLibrary }) => {
+const MediaLibrary = ({}) => {
+  const [mediaLibrary, setMediaLibrary] = useState<any[]>([]);
   const [searchResultedMediaLibrary, onSearchInputChange] = useSearch(
     mediaLibrary,
     ["title", "description"]
@@ -31,7 +31,9 @@ const MediaLibrary: NextPage<Props> = ({ user, mediaLibrary }) => {
   const [, isAddMediaModalShown, toggleAddMediaModal] = useModal(false);
   const [mediaToUpdate, isUpdateMediaModalShown, toggleUpdateMediaModal] =
     useModal<ArrayElement<typeof mediaLibrary>>();
-  const { authenticatedUser } = useAuthStore();
+  const [loading, setLoading] = useState<boolean>(true);
+
+  const { accessToken, authenticatedUser } = useAuthStore();
   const router = useRouter();
 
   useEffect(() => {
@@ -42,8 +44,31 @@ const MediaLibrary: NextPage<Props> = ({ user, mediaLibrary }) => {
     }
   }, [authenticatedUser]);
 
+  const fetchMedia = async () => {
+    setLoading(true);
+
+    try {
+      const response = await fetch("/api/media-library/read", {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      if (!response.ok) throw new Error("Failed to fetch customers.");
+      const data = await response.json();
+      setMediaLibrary(data);
+    } catch (err: any) {
+      console.error(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMedia();
+  }, [authenticatedUser]);
+
   return (
-    <Main section={SectionName.MediaLibrary} user={user}>
+    <Main section={SectionName.MediaLibrary} user={authenticatedUser}>
       <ActionBar
         onSearchInputChange={onSearchInputChange}
         action={{
@@ -51,41 +76,35 @@ const MediaLibrary: NextPage<Props> = ({ user, mediaLibrary }) => {
           onClick: () => toggleAddMediaModal(true),
         }}
       />
-      <MediaLibraryTable
-        mediaLibrary={searchResultedMediaLibrary}
-        onUpdate={(media) => toggleUpdateMediaModal(true, media)}
-      />
+      {loading ? (
+        <div className="h-40 flex justify-center items-center w-full bg-white">
+          <RefreshCcw className="h-10 w-10 animate-spin text-primary" />
+        </div>
+      ) : (
+        <MediaLibraryTable
+          mediaLibrary={searchResultedMediaLibrary}
+          onUpdate={(media) => toggleUpdateMediaModal(true, media)}
+        />
+      )}
       <Modal
         title="Ajouter un média"
         isShown={isAddMediaModalShown}
         onClose={() => toggleAddMediaModal(false)}
       >
-        <MediaForm />
+        <MediaForm onClose={() => toggleAddMediaModal(false)} />
       </Modal>
       <Modal
         title="Modifier un média"
         isShown={isUpdateMediaModalShown}
         onClose={() => toggleUpdateMediaModal(false)}
       >
-        <MediaForm media={mediaToUpdate} />
+        <MediaForm
+          onClose={() => toggleAddMediaModal(false)}
+          media={mediaToUpdate}
+        />
       </Modal>
     </Main>
   );
 };
-
-// export const getServerSideProps: GetServerSideProps = async (context) => {
-//     // const user = (await getToken(context)) as unknown as AuthenticatedUser;
-    // if (getRoleLevel(authenticatedUser?.role) === 2) return ({redirect: {destination: '/media-library/customer', permanent: true}})
-//     const mediaLibrary = await mediaLibraryService.getAll(user.customer?.id)
-
-//     const result: GetServerSidePropsResult<Props> = {
-//         props: {
-//             user: JSON.parse(JSON.stringify(user)),
-//             mediaLibrary: JSON.parse(JSON.stringify(mediaLibrary))
-//         },
-//     };
-
-//     return result;
-// };
 
 export default MediaLibrary;

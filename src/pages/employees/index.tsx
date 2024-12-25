@@ -18,8 +18,8 @@ import employeeService from "@/domain/employees/services/EmployeeService";
 import {labeledJobLevels} from "@/common/utils/statics";
 import {EmployeeUpdateForm} from "@/domain/employees/components/EmployeeUpdateForm";
 import EmployeeDetails from "@/domain/employees/components/EmployeeDetails";
-import {md5Hash} from "@/common/utils/functions";
-import {ArrayElement} from "@/common/utils/types";
+import { ArrayElement } from "@/common/utils/types";
+import { useAuthStore } from "@/zustand/auth-store";
 
 interface Props {
     user: AuthenticatedUser
@@ -35,44 +35,69 @@ const EmployeesPage: NextPage<Props> = ({user, employees, departments}) => {
     const [searchResultedEmployees, onSearchInputChange] = useSearch(employees, ['firstName', 'lastName', 'registration'])
     const [filteredEmployees, onFilterValueChange] = useFilter(searchResultedEmployees, ['department.id' as any, 'level'])
 
+    const { authenticatedUser } = useAuthStore();
+
     return (
-        <>
-            <Main section={SectionName.Employees} user={user}>
-                <ActionBar action={{text: 'Ajouter un salarié', onClick: () => setIsAddEmployeeModalShown(true)}}
-                           onSearchInputChange={onSearchInputChange}/>
-                <FilterGroup>
-                    <Filter
-                        label='Departement'
-                        icon='BuildingOfficeIcon'
-                        values={departments.map(({id, title}) => [id, title])}
-                        onValueChange={(e: ChangeEvent<HTMLSelectElement>) => onFilterValueChange('department.id' as any, e)}
-                    />
-                    <Filter
-                        label='Poste'
-                        icon='BriefcaseIcon'
-                        values={labeledJobLevels}
-                        onValueChange={(e: ChangeEvent<HTMLSelectElement>) => onFilterValueChange('level', e)}
-                    />
-                </FilterGroup>
-                <EmployeeTable
-                    employees={filteredEmployees}
-                    onClick={(employee: any) => setIsEmployeeModalShown(true, employee)}
-                    onUpdate={(employee: any) => setIsEditEmployeeModalShown(true, employee)}
-                />
-            </Main>
-            <Modal title='Ajouter un salarié' isShown={isAddEmployeeModalShown}
-                   onClose={() => setIsAddEmployeeModalShown(false)}>
-                <EmployeeCreateForm departments={departments}/>
-            </Modal>
-            <Modal title='Modifier le salarié' isShown={isEditEmployeeModalShown}
-                   onClose={() => setIsEditEmployeeModalShown(false)}>
-                <EmployeeUpdateForm employee={employeeToUpdate} departments={departments}/>
-            </Modal>
-            <Modal title='Détails du salarié' isShown={isEmployeeModalShown}
-                   onClose={() => setIsEmployeeModalShown(false)}>
-                <EmployeeDetails employee={employeeToShow}/>
-            </Modal>
-        </>
+      <>
+        <Main section={SectionName.Employees} user={authenticatedUser}>
+          <ActionBar
+            action={{
+              text: "Ajouter un salarié",
+              onClick: () => setIsAddEmployeeModalShown(true),
+            }}
+            onSearchInputChange={onSearchInputChange}
+          />
+          <FilterGroup>
+            <Filter
+              label="Departement"
+              icon="BuildingOfficeIcon"
+              values={departments.map(({ id, title }) => [id, title])}
+              onValueChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                onFilterValueChange("department.id" as any, e)
+              }
+            />
+            <Filter
+              label="Poste"
+              icon="BriefcaseIcon"
+              values={labeledJobLevels}
+              onValueChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                onFilterValueChange("level", e)
+              }
+            />
+          </FilterGroup>
+          <EmployeeTable
+            employees={filteredEmployees}
+            onClick={(employee: any) => setIsEmployeeModalShown(true, employee)}
+            onUpdate={(employee: any) =>
+              setIsEditEmployeeModalShown(true, employee)
+            }
+          />
+        </Main>
+        <Modal
+          title="Ajouter un salarié"
+          isShown={isAddEmployeeModalShown}
+          onClose={() => setIsAddEmployeeModalShown(false)}
+        >
+          <EmployeeCreateForm departments={departments} />
+        </Modal>
+        <Modal
+          title="Modifier le salarié"
+          isShown={isEditEmployeeModalShown}
+          onClose={() => setIsEditEmployeeModalShown(false)}
+        >
+          <EmployeeUpdateForm
+            employee={employeeToUpdate}
+            departments={departments}
+          />
+        </Modal>
+        <Modal
+          title="Détails du salarié"
+          isShown={isEmployeeModalShown}
+          onClose={() => setIsEmployeeModalShown(false)}
+        >
+          <EmployeeDetails employee={employeeToShow} />
+        </Modal>
+      </>
     );
 }
 

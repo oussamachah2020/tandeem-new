@@ -1,22 +1,59 @@
-import {FC} from "react";
+import { FC, useMemo, useState } from "react";
 import Datatable from "@/common/components/datatable/Datatable";
 import ContractStatus from "@/domain/contracts/components/ContractStatus";
 import customerService from "@/domain/customers/services/CustomerService";
 import Label from "@/common/components/atomic/Label";
-import {DatatableRow} from "@/common/components/datatable/DatatableRow";
-import {ImagePreview} from "@/common/components/global/ImagePreview";
-import {DatatableValue} from "@/common/components/datatable/DatatableValue";
-import {useStaticValues} from "@/common/context/StaticValuesContext";
+import { DatatableRow } from "@/common/components/datatable/DatatableRow";
+import { ImagePreview } from "@/common/components/global/ImagePreview";
+import { DatatableValue } from "@/common/components/datatable/DatatableValue";
+import { useStaticValues } from "@/common/context/StaticValuesContext";
 
 interface Props {
-    customers: Awaited<ReturnType<typeof customerService.getAll>>
-    onClick: (customer: any) => void
-    onUpdate: (customer: any) => void
+  customers: Awaited<ReturnType<typeof customerService.getAll>>;
+  onClick: (customer: any) => void;
+  onUpdate: (customer: any) => void;
 }
 
+type SortField = "name" | "address" | "category" | "contract";
 
 const CustomerTable: FC<Props> = ({ customers, onUpdate, onClick }) => {
   const { label, category, confirmation } = useStaticValues();
+  const [sortField, setSortField] = useState<SortField>("name");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+
+  const handleSortChange = (field: SortField) => {
+    if (field === "address") {
+      // Always sort by ascending order for address
+      setSortField("address");
+      setSortOrder("asc");
+    } else if (sortField === field) {
+      // Toggle sort order if the same field is clicked
+      setSortOrder((prevOrder) => (prevOrder === "asc" ? "desc" : "asc"));
+    } else {
+      // Set new field and default to ascending order
+      setSortField(field);
+      setSortOrder("asc");
+    }
+  };
+
+  const sortedCustomers = useMemo(() => {
+    return [...customers].sort((a, b) => {
+      const aValue = (a?.[sortField] || "").toString().toLowerCase();
+      const bValue = (b?.[sortField] || "").toString().toLowerCase();
+
+      if (sortField === "address") {
+        // Always sort addresses in ascending order
+        return aValue.localeCompare(bValue);
+      }
+
+      if (sortOrder === "asc") {
+        return aValue.localeCompare(bValue);
+      } else {
+        return bValue.localeCompare(aValue);
+      }
+    });
+  }, [sortField, sortOrder, customers]);
+
   return (
     <Datatable
       headers={[
@@ -25,9 +62,13 @@ const CustomerTable: FC<Props> = ({ customers, onUpdate, onClick }) => {
         label.category,
         label.contract,
       ]}
-      isEmpty={customers.length === 0}
+      onSortChange={(headerIndex) => {
+        const fields: SortField[] = ["name", "address", "category", "contract"];
+        handleSortChange(fields[headerIndex]);
+      }}
+      isEmpty={sortedCustomers.length === 0}
     >
-      {customers.map((customer, idx) => (
+      {sortedCustomers.map((customer, idx) => (
         <DatatableRow
           key={idx}
           onClick={() => onClick(customer)}
@@ -55,4 +96,4 @@ const CustomerTable: FC<Props> = ({ customers, onUpdate, onClick }) => {
   );
 };
 
-export default CustomerTable
+export default CustomerTable;

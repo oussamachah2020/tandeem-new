@@ -2,7 +2,6 @@ import { FC, ReactNode, use, useEffect, useMemo, useState } from "react";
 import { TitleBar } from "@/common/components/global/TitleBar";
 import { SectionName, SECTIONS as Sections } from "@/common/security/Sections";
 import * as Icons from "@heroicons/react/24/outline";
-import { AuthenticatedUser } from "@/common/services/AuthService";
 import Link from "@/common/components/atomic/Link";
 import { useAuthStore } from "@/zustand/auth-store";
 import { useRouter } from "next/navigation";
@@ -16,19 +15,21 @@ interface Props {
   children?: ReactNode;
 }
 
-export const Main: FC<Props> = ({ user, section, children }) => {
-  const { accessToken, refreshToken, authenticatedUser, setTokens } =
-    useAuthStore();
+export const Main = ({ user, section, children }: Props) => {
+  const { accessToken, refreshToken, setTokens } = useAuthStore();
   const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const isExpired = isTokenExpired(accessToken);
+
   const sections = useMemo(() => {
-    if (authenticatedUser) {
+    if (user) {
       return Sections.filter(({ authorizedRoles }) => {
-        return authorizedRoles.includes(authenticatedUser?.role);
+        return authorizedRoles.includes(user?.role);
       });
     }
-  }, [authenticatedUser, authenticatedUser?.role]);
+
+    return [];
+  }, [user, user?.role]);
 
   const refreshAccessToken = async (refreshToken: string) => {
     if (!refreshToken) {
@@ -53,13 +54,13 @@ export const Main: FC<Props> = ({ user, section, children }) => {
 
   useEffect(() => {
     const redirection = setInterval(() => {
-      if (!accessToken && !authenticatedUser) {
+      if (!accessToken && !user) {
         router.replace("/login");
       }
     }, 1000);
 
     return () => clearInterval(redirection);
-  }, [accessToken, authenticatedUser]);
+  }, [accessToken, user]);
 
   useEffect(() => {
     if (isExpired) {

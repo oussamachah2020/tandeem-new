@@ -1,22 +1,21 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
 import { getStorage } from "firebase/storage";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
 // Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyC0Svds5qTm4dVciUzvzMDDavKENqwdFeQ",
-  authDomain: "tandeem-1b802.firebaseapp.com",
-  projectId: "tandeem-1b802",
-  storageBucket: "tandeem-1b802.firebasestorage.app",
-  messagingSenderId: "284119809643",
-  appId: "1:284119809643:web:9d90e3ff9128531189bb2e",
-  measurementId: "G-5D3VYZPCMW",
+  apiKey: "AIzaSyBRvipUV0reaOH22eOH6oxhSnrvPk_5ZDA",
+  authDomain: "amplified-alpha-445708-n5.firebaseapp.com",
+  projectId: "amplified-alpha-445708-n5",
+  storageBucket: "amplified-alpha-445708-n5.firebasestorage.app",
+  messagingSenderId: "220898049197",
+  appId: "1:220898049197:web:a0767071407746163c1a24",
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
 const storage = getStorage(app);
 
 export { storage };

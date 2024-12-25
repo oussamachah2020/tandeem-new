@@ -12,9 +12,15 @@ class MediaLibraryService {
 
     async addOne(mediaCreateDto: MediaDto & { customerId?: string }): Promise<keyof typeof staticValues.notification> {
         const {title, description, url, customerId} = mediaCreateDto
-        await prisma
-            .mediaLibrary
-            .create({data: {title, description, url, customerId}})
+        if (customerId) {
+          await prisma.mediaLibrary.create({
+            data: { title, description, url, customerId },
+          });
+        } else {
+          await prisma.mediaLibrary.create({
+            data: { title, description, url },
+          });
+        }
         return 'mediaAddedSuccess'
     }
 

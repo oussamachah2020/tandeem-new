@@ -14,3 +14,5 @@ export interface NotificationContent {
     severity: NotificationSeverity
     message: string
 }
+
+export type Sort = "asc" | "desc";
