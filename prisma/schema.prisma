@@ -88,11 +88,11 @@ model Employee {
   phone        String?
   photo        String
   level        JobLevel
-  acceptedTOS  Boolean  @default(false)
+  acceptedTOS  Boolean    @default(false)
   fcmToken     String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  role         Role        @default(EMPLOYEE)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  role         Role       @default(EMPLOYEE)
   userId       String     @unique @db.Uuid
   user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   customerId   String     @db.Uuid
@@ -260,11 +260,21 @@ model IdeaBox {
 }
 
 model Categories {
-  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name        String
-  partnerId   String   @db.Uuid
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name          String
+  subCategories SubCategories[]
 
   @@map("categories")
+}
+
+model SubCategories {
+  id     String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name   String
+  
+  categoryId String     @db.Uuid
+  Category  Categories  @relation(fields: [categoryId], references: [id])
+
+  @@map("subCategories")
 }
 
 enum PaymentMethod {
