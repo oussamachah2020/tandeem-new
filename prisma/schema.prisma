@@ -102,6 +102,8 @@ model Employee {
 
   consumedOffers EmployeeConsumedOffers[] @relation
   IdeaBox        IdeaBox[]
+  Reactions Reactions[]
+  Comments Comments[]
 
   @@map("employee")
 }
@@ -275,6 +277,39 @@ model SubCategories {
   Category  Categories  @relation(fields: [categoryId], references: [id])
 
   @@map("subCategories")
+}
+
+model Reactions {
+  id     String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid 
+  type        IconType?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  employeeId  String @db.Uuid
+  employee    Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade) 
+  publicationId     String    @db.Uuid
+
+  @@map("reactions")
+}
+
+model Comments {
+  id     String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  text        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  employeeId  String @db.Uuid
+  employee    Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade) 
+  publicationId     String    @db.Uuid
+
+  @@map("comments")
+}
+
+enum IconType {
+  LIKE
+  LOVE
+  FUNNY
+  SUPPORT
+  CELEBRATE
+  INSIGHTFUL
 }
 
 enum PaymentMethod {

@@ -35,12 +35,6 @@ export default async function handler(
 
   const { phoneNumber, email }: LoginBody = req.body;
 
-  if (!phoneNumber && !email) {
-    return res
-      .status(400)
-      .json({ error: "Phone number or email and password are required" });
-  }
-
   try {
     let existingEmployee;
 

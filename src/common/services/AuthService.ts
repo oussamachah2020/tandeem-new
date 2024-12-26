@@ -33,14 +33,14 @@ class AuthService {
         const name = user.admin?.name ?? user.customer?.name ?? `${user.employee?.firstName} ${user.employee?.lastName}`
         const image = user.admin?.photo ?? user.customer?.logo ?? user.employee?.photo
         return {
-            id: user.id,
-            email: user.email,
-            name,
-            image,
-            role: user.role,
-            customer: user.customer,
-            employee: user.employee
-        }
+          id: user.id,
+          email: user.email,
+          name,
+          image,
+          role: user.role,
+          customer: user.customer,
+          // employee: user.employee
+        };
     };
 
     async updatePassword(email: string, oldPassword: string, newPassword: string): Promise<keyof typeof staticValues.notification> {
@@ -65,20 +65,19 @@ class AuthService {
         const resetTokenExpiresAt = new Date()
         resetTokenExpiresAt.setHours(resetTokenExpiresAt.getHours() + 1);
         const user = await prisma.user.update({
-            data: {
-                resetToken,
-                resetTokenExpiresAt
-            },
-            where: {
-                email,
-                role: {not: Role.TANDEEM}
-            },
-            include: {
-                admin: true,
-                customer: true,
-                employee: true,
-            }
-        })
+          data: {
+            resetToken,
+          },
+          where: {
+            email,
+            role: { not: Role.TANDEEM },
+          },
+          include: {
+            admin: true,
+            customer: true,
+            employee: true,
+          },
+        });
         await mailService.send(
             'reset-password.ejs',
             {
@@ -100,26 +99,26 @@ class AuthService {
     }
 
     async resetPassword(token: string, password: string) {
-        const user = await prisma.user.findUnique({
-            where: {
-                resetToken: token
-            }
-        })
-        if (user) {
-            if (user.resetTokenExpiresAt! > new Date()) {
-                await prisma.user.update({
-                    where: {id: user.id},
-                    data: {
-                        resetToken: {set: null},
-                        resetTokenExpiresAt: {set: null},
-                        password: await hash(password, 12)
-                    }
-                })
-                return 'passwordUpdatedSuccessfully'
-            }
-            return 'resetTokenExpired'
-        }
-        return 'passwordResetError'
+      // const user = await prisma.user.findUnique({
+      //     where: {
+      //         resetToken: token
+      //     }
+      // })
+      // if (user) {
+      //     if (user.resetTokenExpiresAt! > new Date()) {
+      //         await prisma.user.update({
+      //             where: {id: user.id},
+      //             data: {
+      //                 resetToken: {set: null},
+      //                 resetTokenExpiresAt: {set: null},
+      //                 password: await hash(password, 12)
+      //             }
+      //         })
+      //         return 'passwordUpdatedSuccessfully'
+      //     }
+      //     return 'resetTokenExpired'
+      // }
+      // return 'passwordResetError'
     }
 }
 
