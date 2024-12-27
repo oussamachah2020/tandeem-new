@@ -1,7 +1,6 @@
-import fileService from "@/common/services/FileService";
 import prisma from "@/common/libs/prisma";
-import {PublicationCreateDto, PublicationCreateFilesDto} from "@/domain/publications/dtos/PublicationCreateDto";
-import {PublicationUpdateDto, PublicationUpdateFilesDto} from "@/domain/publications/dtos/PublicationUpdateDto";
+import { PublicationCreateDto } from "@/domain/publications/dtos/PublicationCreateDto";
+import { PublicationUpdateDto } from "@/domain/publications/dtos/PublicationUpdateDto";
 import staticValues from "@/common/context/StaticValues";
 
 class PublicationService {
@@ -20,13 +19,12 @@ class PublicationService {
   addOne = async (
     publicationDto: PublicationCreateDto
   ): Promise<keyof typeof staticValues.notification> => {
-    // const imageRef = await fileService.save('publications', publicationDto.image)
     await prisma.publication.create({
       data: {
         title: publicationDto.title,
         content: publicationDto.content,
         pinned: publicationDto.pinned !== undefined,
-        photo: publicationDto.photoUrl,
+        photos: publicationDto.photos,
         customerId: publicationDto.customerId ?? null,
       },
     });
@@ -60,9 +58,11 @@ class PublicationService {
 
 let publicationService: PublicationService;
 
-if (process.env.NODE_ENV === 'production') publicationService = new PublicationService();
+if (process.env.NODE_ENV === "production")
+  publicationService = new PublicationService();
 else {
-    if (!global.publicationService) global.publicationService = new PublicationService();
-    publicationService = global.publicationService;
+  if (!global.publicationService)
+    global.publicationService = new PublicationService();
+  publicationService = global.publicationService;
 }
 export default publicationService;

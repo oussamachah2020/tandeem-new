@@ -45,7 +45,6 @@ const Publications: NextPage<Props> = ({}) => {
     ArrayElement<typeof publications>
   >(searchResultedPublications, ["pinned"]);
 
-  // Fetch customers data from an API endpoint
   const fetchCustomers = async () => {
     setLoading(true);
 

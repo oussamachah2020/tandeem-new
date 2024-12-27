@@ -14,11 +14,7 @@ export const handler = async (
   const publication: PublicationCreateDto = req.body;
 
   try {
-    const user = req.user; // Authenticated user info
-
-    await publicationService.addOne({
-      ...publication,
-    });
+    await publicationService.addOne(publication);
 
     res.status(201).json({
       message: "Publication created successfully.",

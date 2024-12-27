@@ -1,28 +1,70 @@
-import {FC} from "react";
+import { FC, useMemo, useState } from "react";
 import Datatable from "@/common/components/datatable/Datatable";
 import adminService from "@/domain/admins/services/AdminService";
-import {DatatableRow} from "@/common/components/datatable/DatatableRow";
-import {DatatableValue} from "@/common/components/datatable/DatatableValue";
-import {ImagePreview} from "@/common/components/global/ImagePreview";
+import { DatatableRow } from "@/common/components/datatable/DatatableRow";
+import { DatatableValue } from "@/common/components/datatable/DatatableValue";
+import { ImagePreview } from "@/common/components/global/ImagePreview";
 import Label from "@/common/components/atomic/Label";
-import {ArrayElement} from "@/common/utils/types";
+import { ArrayElement } from "@/common/utils/types";
 import ConfirmableActionButton from "@/common/components/atomic/ConfirmableActionButton";
-import {useStaticValues} from "@/common/context/StaticValuesContext";
+import { useStaticValues } from "@/common/context/StaticValuesContext";
+
+type SortField = "name" | "email" | "status";
 
 interface Props {
-    admins: Awaited<ReturnType<typeof adminService.getAll>>
-    onUpdate: (admin: ArrayElement<Awaited<ReturnType<typeof adminService.getAll>>>) => void
+  admins: Awaited<ReturnType<typeof adminService.getAll>>;
+  onUpdate: (
+    admin: ArrayElement<Awaited<ReturnType<typeof adminService.getAll>>>
+  ) => void;
 }
 
 const AdminTable: FC<Props> = ({ admins, onUpdate }) => {
   const { label, action, confirmation, tooltip } = useStaticValues();
+  const [sortField, setSortField] = useState<SortField>("name");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+
+  const handleSortChange = (field: SortField) => {
+    if (sortField === field) {
+      // Toggle sort order if the same field is clicked
+      setSortOrder((prevOrder) => (prevOrder === "asc" ? "desc" : "asc"));
+    } else {
+      // Set new field and default to ascending order
+      setSortField(field);
+      setSortOrder("asc");
+    }
+  };
+
+  const sortedAdmins = useMemo(() => {
+    if (admins.length) {
+      return [...admins].sort((a, b) => {
+        const aValue = (a?.name || "").toString().toLowerCase();
+        const bValue = (b?.name || "").toString().toLowerCase();
+
+        if (sortField === "name") {
+          // Always sort by name in ascending order
+          return aValue.localeCompare(bValue);
+        }
+
+        if (sortOrder === "asc") {
+          return aValue.localeCompare(bValue);
+        } else {
+          return bValue.localeCompare(aValue);
+        }
+      });
+    }
+  }, [sortField, sortOrder, admins]);
+
   return (
     <Datatable
-      isEmpty={admins?.length === 0}
+      isEmpty={sortedAdmins?.length === 0}
       headers={[label.name, label.email, label.status]}
+      onSortChange={(headerIndex) => {
+        const fields: SortField[] = ["name", "email", "status"];
+        handleSortChange(fields[headerIndex]);
+      }}
     >
-      {admins && admins.length
-        ? admins?.map((admin, idx) => (
+      {sortedAdmins && sortedAdmins.length
+        ? sortedAdmins?.map((admin, idx) => (
             <DatatableRow
               key={idx}
               onUpdate={() => onUpdate(admin)}
@@ -88,4 +130,4 @@ const AdminTable: FC<Props> = ({ admins, onUpdate }) => {
   );
 };
 
-export default AdminTable
+export default AdminTable;

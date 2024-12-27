@@ -5,6 +5,9 @@ import { useStaticValues } from "@/common/context/StaticValuesContext";
 import Button from "@/common/components/atomic/Button";
 import { useAuthStore } from "@/zustand/auth-store";
 import toast from "react-hot-toast";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage"; // Firebase storage methods
+import { v4 as uuidv4 } from "uuid"; // To generate unique file names
+import { storage } from "../../../../firebase";
 
 type Props = {
   onClose: () => void;
@@ -37,25 +40,79 @@ export const PartnerCreateForm = ({ onClose }: Props) => {
 
   const { accessToken } = useAuthStore();
 
-  const onSubmit = async (data: any) => {
-    const partnerData = {
-      name: data.name,
-      address: data.address,
-      website: data.website,
-      category: data.category,
-      logoUrl: data.logo,
-      accepts: data.accepts,
-      scanUrl: data.contractScan,
-      contractFrom: new Date(data.contractFrom),
-      contractTo: new Date(data.contractTo),
-      representativeName: data.representativeName,
-      representativePhone: data.representativePhone,
-      representativeEmail: data.representativeEmail,
-    };
+  const uploadFile = async (file: File, folder: string): Promise<string> => {
+    if (!file) {
+      throw new Error("No file provided");
+    }
 
+    // Validate file size (e.g., max 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      throw new Error(`File size exceeds ${maxSize / 1024 / 1024}MB limit`);
+    }
+
+    // Create a reference with a specific path and file name
+    const fileName = `${uuidv4()}_${file.name}`;
+    const fileRef = ref(storage, `${folder}/${fileName}`);
+
+    return new Promise((resolve, reject) => {
+      const uploadTask = uploadBytesResumable(fileRef, file);
+
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          // You can add progress tracking here if needed
+          const progress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          console.log(`Upload progress: ${progress}%`);
+        },
+        (error) => {
+          console.error("Upload error:", error);
+          reject(error);
+        },
+        async () => {
+          try {
+            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+            resolve(downloadURL);
+          } catch (error) {
+            console.error("Error getting download URL:", error);
+            reject(error);
+          }
+        }
+      );
+    });
+  };
+
+  const onSubmit = async (data: any) => {
     toast.loading("Un moment...", { id: "create" });
 
     try {
+      const partnerData: any = {
+        name: data.name,
+        address: data.address,
+        website: data.website,
+        category: data.category,
+        accepts: data.accepts,
+        contractFrom: new Date(data.contractFrom),
+        contractTo: new Date(data.contractTo),
+        representativeName: data.representativeName,
+        representativePhone: data.representativePhone,
+        representativeEmail: data.representativeEmail,
+      };
+
+      if (data.logo && data.logo.length > 0) {
+        const logoUrl = await uploadFile(data.logo[0], "logos");
+        partnerData.logoUrl = logoUrl;
+      }
+
+      if (data.contractScan && data.contractScan.length > 0) {
+        const contractScanUrl = await uploadFile(
+          data.contractScan[0],
+          "contracts"
+        );
+        partnerData.scanUrl = contractScanUrl;
+      }
+
       const response = await fetch("/api/partners/create", {
         method: "POST",
         headers: {

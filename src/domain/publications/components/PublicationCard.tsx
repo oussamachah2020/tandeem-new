@@ -16,19 +16,14 @@ const PublicationCard: FC<Props> = ({ publication, onUpdate }) => (
   <div className="flex flex-col h-full gap-6 bg-white rounded-xl p-6 shadow-lg border border-gray-200">
     <div className="col-span-2 flex flex-col gap-5">
       <img
-        className="border rounded-md"
+        className="border rounded-md w-full h-64 object-cover"
         src={
-          publication?.photo === ""
+          publication?.photos.length === 0
             ? "https://www.angiil.com/wp-content/uploads/2021/11/Pub-e1637242285887.png"
-            : publication.photo
+            : publication.photos[0]
         }
         alt="photo"
       />
-      {/* <ImagePreview
-        imageRef={publication.photo}
-        width="w-full"
-        aspectRatio="aspect-video"
-      /> */}
     </div>
 
     <div className="col-span-3 flex flex-col gap-4">
@@ -38,7 +33,6 @@ const PublicationCard: FC<Props> = ({ publication, onUpdate }) => (
             {publication.title}
           </h2>
           <div className="flex items-center gap-3 text-sm text-gray-600">
-            {/* Pinned Status */}
             <div className="flex items-center gap-1">
               {publication.pinned ? (
                 <CheckIcon className="w-5 h-5 text-blue-500" />
@@ -47,9 +41,7 @@ const PublicationCard: FC<Props> = ({ publication, onUpdate }) => (
               )}
               <span>{publication.pinned ? "Épinglé" : "Non Épinglé"}</span>
             </div>
-            {/* Divider */}
             <div className="h-5 w-0.5 bg-gray-300"></div>
-            {/* Creation Date */}
             <div className="flex items-center gap-2">
               <span>Créé :</span>
               <span className="font-medium text-blue-600">
@@ -59,7 +51,6 @@ const PublicationCard: FC<Props> = ({ publication, onUpdate }) => (
           </div>
         </div>
 
-        {/* Action Buttons */}
         <div className="flex flex-col gap-1 lg:flex-row">
           <ActionButton
             icon="PencilSquareIcon"
@@ -74,11 +65,9 @@ const PublicationCard: FC<Props> = ({ publication, onUpdate }) => (
           />
         </div>
       </div>
-
-      {/* Content Section */}
     </div>
-    <div className="w-full rounded-lg ">
-      <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed">
+    <div className="w-full overflow-hidden flex flex-wrap rounded-lg">
+      <p className="text-sm w-full text-gray-700 whitespace-pre-wrap break-words leading-relaxed">
         {publication.content}
       </p>
     </div>

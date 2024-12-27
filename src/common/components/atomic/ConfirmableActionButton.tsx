@@ -73,20 +73,35 @@ const ConfirmableActionButton: FC<Props> = ({
         title={confirmation.areYouSure}
         isShown={isConfirmationModalShown}
         onClose={() => setIsConfirmationModalShown(false)}
-        // width="w-1/2"
+        width="w-[40%]"
       >
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col">
           <div className="text-[1rem] whitespace-pre-line leading-relaxed">
-            {message}
+            {message ? (
+              message
+            ) : (
+              <p className="text-gray-500">
+                Cette action ne peut pas être annulée. Cela supprimera
+                définitivement votre compte et vos données de nos serveurs.
+              </p>
+            )}
           </div>
-          <hr className="border-0 border-b" />
-          <button
-            onClick={handleAction}
-            className="w-full bg-red-500 h-12 rounded-md text-white  flex flex-row justify-center items-center gap-3"
-          >
-            <TrashIcon className="h-5 w-5 text-white" />
-            Supprimer
-          </button>
+
+          <div className="flex flex-row justify-end gap-3 mt-2">
+            <button
+              className="border rounded-md w-32"
+              onClick={() => setIsConfirmationModalShown(false)}
+            >
+              Fermer
+            </button>
+            <button
+              onClick={handleAction}
+              className="w-36 bg-red-500 h-12 rounded-md text-white  flex flex-row justify-center items-center gap-2"
+            >
+              <TrashIcon className="h-5 w-5 text-white" />
+              Supprimer
+            </button>
+          </div>
           {/* {resourceRefs?.map((ref, idx) => (
                   <input key={idx} name="refs" value={ref} className="hidden" />
                 ))} */}
