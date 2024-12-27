@@ -21,21 +21,21 @@ const App = ({ Component, pageProps }: AppProps) => {
   const notificationKeyState = useState<
     keyof typeof staticValues.notification | null
   >(null);
-  const router = useRouter();
-  const accessToken = useAuthStore((state) => state.accessToken); // Get the token from Zustand
+  // const router = useRouter();
+  // const accessToken = useAuthStore((state) => state.accessToken); // Get the token from Zustand
 
-  useEffect(() => {
-    const isExpired = isTokenExpired(accessToken);
-    if (accessToken) {
-      if (!isExpired) {
-        router.replace("/dashboard");
-      } else {
-        router.replace("/login");
-      }
-    } else {
-      router.replace("/login");
-    }
-  }, [accessToken]);
+  // useEffect(() => {
+  //   const isExpired = isTokenExpired(accessToken);
+  //   if (accessToken) {
+  //     if (!isExpired) {
+  //       router.replace("/dashboard");
+  //     } else {
+  //       router.replace("/login");
+  //     }
+  //   } else {
+  //     router.replace("/login");
+  //   }
+  // }, [accessToken]);
 
   return (
     <>

@@ -91,12 +91,6 @@ const PublicationCreateForm = ({ onClose }: { onClose: () => void }) => {
 
       {error && <p className="text-red-500">{error}</p>}
       {successMessage && <p className="text-green-500">{successMessage}</p>}
-      <button
-        type="submit"
-        className="w-full bg-primary h-12 text-white font-semibold rounded-md mt-2"
-      >
-        Ajouter
-      </button>
     </form>
   );
 };

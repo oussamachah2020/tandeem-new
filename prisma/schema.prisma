@@ -27,14 +27,14 @@ model Publication {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   title     String
   content   String
-  photo     String
+  photos     String[]
   pinned    Boolean
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   customerId String?   @db.Uuid
   customer   Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
-
+  reactions   Reactions[]
   @@map("publication")
 }
 
@@ -287,6 +287,7 @@ model Reactions {
   employeeId  String @db.Uuid
   employee    Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade) 
   publicationId     String    @db.Uuid
+  Publication Publication @relation(fields: [publicationId], references: [id])
 
   @@map("reactions")
 }

@@ -3,6 +3,7 @@ import prisma from "@/common/libs/prisma";
 import {Prisma} from "@prisma/client";
 import {constants} from "http2";
 import SortOrder = Prisma.SortOrder;
+import { AuthenticatedRequest, authMiddleware } from "@/apiMiddleware";
 
 interface TypedNextApiRequest extends NextApiRequest {
   query: {
@@ -30,15 +31,15 @@ interface PublicationsResponse {
   customer: PaginatedResponse<any>;
 }
 
-// /api/publications?id=123&tandeemPage=2&customerPage=1&limit=20
+async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
+  const { tandeemPage = "1", customerPage = "1", limit = "10" } = req.query;
 
-export default async (req: TypedNextApiRequest, res: NextApiResponse) => {
-  const { id, tandeemPage = "1", customerPage = "1", limit = "10" } = req.query;
+  const user = req?.user;
 
   // Convert string parameters to numbers
-  const tandeemPageNumber = parseInt(tandeemPage, 10);
-  const customerPageNumber = parseInt(customerPage, 10);
-  const limitNumber = parseInt(limit, 10);
+  const tandeemPageNumber = parseInt(tandeemPage as string, 10);
+  const customerPageNumber = parseInt(customerPage as string, 10);
+  const limitNumber = parseInt(limit as string, 10);
 
   // Validate pagination parameters
   if (
@@ -56,7 +57,9 @@ export default async (req: TypedNextApiRequest, res: NextApiResponse) => {
   const customerSkip = (customerPageNumber - 1) * limitNumber;
 
   try {
-    const employee = await prisma.employee.findUnique({ where: { id } });
+    const employee = await prisma.employee.findUnique({
+      where: { id: user?.id },
+    });
 
     if (!employee) {
       return res.status(constants.HTTP_STATUS_NOT_FOUND).end();
@@ -81,6 +84,25 @@ export default async (req: TypedNextApiRequest, res: NextApiResponse) => {
         photo: true,
         pinned: true,
         createdAt: true,
+        reactions: {
+          select: {
+            id: true,
+            type: true,
+            employee: {
+              select: {
+                firstName: true,
+                lastName: true,
+                id: true,
+                photo: true,
+              },
+            },
+          },
+        },
+        _count: {
+          select: {
+            reactions: true,
+          },
+        },
       },
       orderBy: [{ createdAt: SortOrder.desc }, { pinned: SortOrder.desc }],
       skip: tandeemSkip,
@@ -97,6 +119,25 @@ export default async (req: TypedNextApiRequest, res: NextApiResponse) => {
         photo: true,
         pinned: true,
         createdAt: true,
+        reactions: {
+          select: {
+            id: true,
+            type: true,
+            employee: {
+              select: {
+                firstName: true,
+                lastName: true,
+                id: true,
+                photo: true,
+              },
+            },
+          },
+        },
+        _count: {
+          select: {
+            reactions: true,
+          },
+        },
       },
       orderBy: [{ createdAt: SortOrder.desc }, { pinned: SortOrder.desc }],
       skip: customerSkip,
@@ -141,4 +182,6 @@ export default async (req: TypedNextApiRequest, res: NextApiResponse) => {
       error: "Failed to fetch publications",
     });
   }
-};
+}
+
+export default authMiddleware(handler);
