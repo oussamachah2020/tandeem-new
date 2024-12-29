@@ -15,30 +15,27 @@ interface Props {
 const ContractDetails: FC<Props> = ({contract}) => {
     const {label} = useStaticValues()
     return (
-        <DetailsSection title={label.contract}>
-            <DetailsRow title={label.scan}>
-                <Link href={getDownloadUrl(contract.scan)}>
-                    <EyeIcon className='w-5 h-5'/>
-                </Link>
-            </DetailsRow>
-            <DetailsRow title={label.status}>
-                <ContractStatus status={contract.status}/>
-            </DetailsRow>
-            <DetailsRow
-                title={label.validity}
-                classname='flex items-center gap-3'
-            >
-                {formatDate(contract.from)}
-                <ArrowRightIcon className='w-4 h-4'/>
-                {formatDate(contract.prematureTo ?? contract.to)}
-                {contract.prematureTo && (
-                    <div className='line-through decoration-secondary text-gray-400'>
-                        {formatDate(contract.to)}
-                    </div>
-                )}
-            </DetailsRow>
-        </DetailsSection>
-    )
+      <DetailsSection title={label.contract}>
+        <DetailsRow title={label.scan}>
+          <Link href={"#"}>
+            <EyeIcon className="w-5 h-5" />
+          </Link>
+        </DetailsRow>
+        <DetailsRow title={label.status}>
+          <ContractStatus status={contract.status} />
+        </DetailsRow>
+        <DetailsRow title={label.validity} classname="flex items-center gap-3">
+          {formatDate(contract.from)}
+          <ArrowRightIcon className="w-4 h-4" />
+          {formatDate(contract.prematureTo ?? contract.to)}
+          {contract.prematureTo && (
+            <div className="line-through decoration-secondary text-gray-400">
+              {formatDate(contract.to)}
+            </div>
+          )}
+        </DetailsRow>
+      </DetailsSection>
+    );
 }
 
 

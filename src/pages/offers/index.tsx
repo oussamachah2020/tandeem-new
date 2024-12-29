@@ -24,12 +24,11 @@ import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/zustand/auth-store";
 
 interface Props {
-  user: AuthenticatedUser;
   partners: Awaited<ReturnType<typeof partnerService.getAll>>;
   offers: Awaited<ReturnType<typeof offerService.getAllForLevel1>>;
 }
 
-const Offers: NextPage<Props> = ({ user, offers, partners }) => {
+const Offers = ({ offers, partners }: Props) => {
   const [, isAddOfferModalShown, toggleAddOfferModal] = useModal(false);
   const [offerToShow, isOfferModalShown, toggleOfferModal] =
     useModal<ArrayElement<typeof offers>>();
@@ -53,7 +52,7 @@ const Offers: NextPage<Props> = ({ user, offers, partners }) => {
 
   return (
     <>
-      <Main section={SectionName.Offers} user={user}>
+      <Main section={SectionName.Offers} user={authenticatedUser}>
         <ActionBar
           action={{
             text: "Ajouter une offre",
@@ -80,7 +79,7 @@ const Offers: NextPage<Props> = ({ user, offers, partners }) => {
           />
         </FilterGroup>
         <OfferTable
-          offers={filteredOffers}
+          offers={[]}
           onClick={(offer: any) => toggleOfferModal(true, offer)}
           onUpdate={(offer: any) => toggleOfferUpdateModal(true, offer)}
         />
@@ -112,29 +111,5 @@ const Offers: NextPage<Props> = ({ user, offers, partners }) => {
   );
 };
 
-
-// export const getServerSideProps: GetServerSideProps = async (context) => {
-//     const user = (await getToken(context)) as unknown as AuthenticatedUser;
-
-//     if (getRoleLevel(user.role) === 2)
-//         return ({
-//             redirect: {
-//                 destination: 'offers/customer',
-//                 permanent: true
-//             }
-//         })
-
-//     const offers = await offerService.getAllForLevel1()
-//     const partners = await partnerService.getAll()
-//     const result: GetServerSidePropsResult<Props> = {
-//         props: {
-//             user: JSON.parse(JSON.stringify(user)),
-//             offers: JSON.parse(JSON.stringify(offers)),
-//             partners: JSON.parse(JSON.stringify(partners))
-//         }
-//     }
-
-//     return result
-// }
 
 export default Offers;

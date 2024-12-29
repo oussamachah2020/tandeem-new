@@ -1,6 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import employeeService from "@/domain/employees/services/EmployeeService";
-import { EmployeeUpdateDto } from "@/domain/employees/dtos/EmployeeUpdateDto";
 
 // Main API handler
 export default async (req: NextApiRequest, res: NextApiResponse) => {

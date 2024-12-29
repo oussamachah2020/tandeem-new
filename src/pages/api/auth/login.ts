@@ -30,33 +30,44 @@ export default async function handler(
   try {
     const existingAccount = await prisma.user.findUnique({
       where: { email },
+      include: { customer: true },
     });
 
     if (existingAccount) {
-      const accessToken = jwt.sign(
-        {
-          id: existingAccount.id,
-          email: existingAccount.email,
-          role: existingAccount.role,
-        },
-        ACCESS_TOKEN_SECRET,
-        { expiresIn: "1h" }
+      const isPasswordMatching = await bcrypt.compare(
+        password,
+        existingAccount.password
       );
 
-      const refreshToken = jwt.sign(
-        {
-          id: existingAccount.id,
-          email: existingAccount.email,
-          role: existingAccount.role,
-        },
-        REFRESH_TOKEN_SECRET,
-        { expiresIn: "1d" }
-      );
-      return res.status(200).json({
-        message: "Account valid",
-        accessToken,
-        refreshToken,
-      });
+      if (isPasswordMatching) {
+        const accessToken = jwt.sign(
+          {
+            id: existingAccount.id,
+            email: existingAccount.email,
+            role: existingAccount.role,
+            customer: existingAccount.customer,
+          },
+          ACCESS_TOKEN_SECRET,
+          { expiresIn: "1d" }
+        );
+
+        const refreshToken = jwt.sign(
+          {
+            id: existingAccount.id,
+            email: existingAccount.email,
+            role: existingAccount.role,
+          },
+          REFRESH_TOKEN_SECRET,
+          { expiresIn: "1d" }
+        );
+        return res.status(200).json({
+          message: "Account valid",
+          accessToken,
+          refreshToken,
+        });
+      } else {
+        return res.status(404).json({ message: "Invalid credentials" });
+      }
     }
 
     // Hash the password

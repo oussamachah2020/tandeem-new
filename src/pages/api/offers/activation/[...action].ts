@@ -1,9 +1,14 @@
-import {NextApiRequest, NextApiResponse} from "next";
-import {handle} from "@/apiMiddleware";
+import { NextApiResponse } from "next";
+import { AuthenticatedRequest, authMiddleware } from "@/apiMiddleware";
 import offerService from "@/domain/offers/shared/services/OfferService";
 
-export default async (req: NextApiRequest, res: NextApiResponse) =>
-    handle<{ id: string }>(req, res, async (payload) => {
-        const action = (req.query['action'] as string[])[0]
-        return await offerService.switchActivation({offerId: payload.body.id, active: action === 'activate'})
-    })
+async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
+  const action = req.query["action"] as string;
+  const { offerId } = req.body;
+  return await offerService.switchActivation({
+    offerId,
+    active: action === "activate",
+  });
+}
+
+export default authMiddleware(handler);

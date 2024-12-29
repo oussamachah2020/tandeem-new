@@ -16,6 +16,9 @@ interface Props {
 
 const CustomerDetails: FC<Props> = ({customer}) => {
     const {label, category} = useStaticValues()
+    
+    console.log(customer);
+
     return (
         <div className='flex gap-10'>
             <div className='bg-white p-1 w-28 h-28 border rounded-lg'>

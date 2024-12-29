@@ -2,13 +2,10 @@ import { FC, ReactNode, use, useEffect, useMemo, useState } from "react";
 import { TitleBar } from "@/common/components/global/TitleBar";
 import { SectionName, SECTIONS as Sections } from "@/common/security/Sections";
 import * as Icons from "@heroicons/react/24/outline";
-import { AuthenticatedUser } from "@/common/services/AuthService";
 import Link from "@/common/components/atomic/Link";
 import { useAuthStore } from "@/zustand/auth-store";
 import { useRouter } from "next/navigation";
 import { isTokenExpired } from "@/common/utils/tokenVerifier";
-import { refreshAccessToken } from "@/common/utils/tokenRefresher";
-import { retrieveTokenPayload } from "@/common/utils/tokenDecoder";
 import { MenuIcon } from "lucide-react";
 import { User } from "../../../../types/auth";
 
@@ -18,32 +15,58 @@ interface Props {
   children?: ReactNode;
 }
 
-export const Main: FC<Props> = ({ user, section, children }) => {
-  const { accessToken, refreshToken, authenticatedUser } = useAuthStore();
+export const Main = ({ user, section, children }: Props) => {
+  const { accessToken, refreshToken, setTokens } = useAuthStore();
   const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const isExpired = isTokenExpired(accessToken);
+
   const sections = useMemo(() => {
-    if (authenticatedUser) {
+    if (user) {
       return Sections.filter(({ authorizedRoles }) => {
-        return authorizedRoles.includes(authenticatedUser?.role);
+        return authorizedRoles.includes(user?.role);
       });
     }
-  }, [authenticatedUser, authenticatedUser?.role]);
+
+    return [];
+  }, [user, user?.role]);
+
+  const refreshAccessToken = async (refreshToken: string) => {
+    if (!refreshToken) {
+      console.error("Refresh token is missing. Cannot refresh access token.");
+      return;
+    }
+    try {
+      const response = await fetch("/api/auth/refresh", {
+        method: "POST",
+        headers: { "Content-Type": "Application/json" },
+        body: JSON.stringify({ refreshToken }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setTokens(data?.accessToken ?? "", refreshToken);
+      }
+    } catch (error) {
+      console.error("Error refreshing access token:", error);
+    }
+  };
 
   useEffect(() => {
     const redirection = setInterval(() => {
-      if (!accessToken && !authenticatedUser) {
+      if (!accessToken && !user) {
         router.replace("/login");
       }
     }, 1000);
 
     return () => clearInterval(redirection);
-  }, [accessToken, authenticatedUser]);
+  }, [accessToken, user]);
 
-  // useEffect(() => {
-  //   refreshAccessToken(refreshToken ?? "");
-  // }, [isExpired, refreshToken]);
+  useEffect(() => {
+    if (isExpired) {
+      refreshAccessToken(refreshToken ?? "");
+    }
+  }, [isExpired, refreshToken]);
 
   return (
     <>

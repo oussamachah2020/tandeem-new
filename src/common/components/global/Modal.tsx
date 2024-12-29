@@ -30,7 +30,7 @@ export const Modal: FC<Props> = ({title, isShown, onClose, children, width}) => 
             <div className="flex justify-between items-center">
               <h1 className="text-2xl font-medium">{title}</h1>
               <button onClick={onClick}>
-                <XMarkIcon className="w-6 h-6 text-primary" />
+                <XMarkIcon className="w-6 h-6 text-black" />
               </button>
             </div>
             <hr />

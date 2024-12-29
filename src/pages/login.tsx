@@ -9,11 +9,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuthStore } from "@/zustand/auth-store";
 import { AuthResponse, User } from "../../types/auth";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
-import FbIcon from "@/../public/icons/fb-icon.svg";
-import InstaIcon from "@/../public/icons/insta-icon.svg";
-import LinkedInIcon from "@/../public/icons/linkedIn-icon.svg";
-import WhatsAppIcon from "@/../public/icons/whatsapp-icon.svg";
 import { FacebookIcon, InstagramIcon, LinkedinIcon } from "lucide-react";
 
 const formSchema = z.object({
@@ -38,6 +33,7 @@ export default function Home() {
   const { accessToken, authenticatedUser, setTokens, setAuthenticatedUser } =
     useAuthStore();
   const router = useRouter();
+  const [errorMessage, setErrorMessage] = useState("");
 
   async function getUserDetails(token: string) {
     const response = await fetch("/api/auth/user-details", {
@@ -48,6 +44,7 @@ export default function Home() {
     });
 
     if (response.ok) {
+      setErrorMessage("");
       const data = await response.json();
       setAuthenticatedUser(data);
     }
@@ -69,8 +66,12 @@ export default function Home() {
       });
       const data: AuthResponse = await response.json();
 
-      getUserDetails(data.accessToken);
-      setTokens(data.accessToken, data.refreshToken);
+      if (response.ok) {
+        getUserDetails(data.accessToken);
+        setTokens(data.accessToken, data.refreshToken);
+      } else if (response.status === 404) {
+        setErrorMessage("Email ou mot de passe incorrect");
+      }
     } catch (error) {
       console.error(error);
     } finally {
@@ -83,7 +84,7 @@ export default function Home() {
       if (accessToken && authenticatedUser) {
         router.replace("/dashboard");
       }
-    }, 1000);
+    }, 300);
 
     return () => clearInterval(redirection);
   }, [accessToken, authenticatedUser]);
@@ -170,6 +171,9 @@ export default function Home() {
                 loading={loading}
                 disabled={!isValid}
               />
+              {errorMessage ? (
+                <p className="text-red-500 text-center">{errorMessage}</p>
+              ) : null}
             </div>
             <div className="flex justify-center mt-10 flex-row items-center gap-2">
               <Link

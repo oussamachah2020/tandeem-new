@@ -27,14 +27,14 @@ model Publication {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   title     String
   content   String
-  photo     String
+  photos     String[]
   pinned    Boolean
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   customerId String?   @db.Uuid
   customer   Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
-
+  reactions   Reactions[]
   @@map("publication")
 }
 
@@ -88,11 +88,11 @@ model Employee {
   phone        String?
   photo        String
   level        JobLevel
-  acceptedTOS  Boolean  @default(false)
+  acceptedTOS  Boolean    @default(false)
   fcmToken     String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  role         Role        @default(EMPLOYEE)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  role         Role       @default(EMPLOYEE)
   userId       String     @unique @db.Uuid
   user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   customerId   String     @db.Uuid
@@ -102,6 +102,8 @@ model Employee {
 
   consumedOffers EmployeeConsumedOffers[] @relation
   IdeaBox        IdeaBox[]
+  Reactions Reactions[]
+  Comments Comments[]
 
   @@map("employee")
 }
@@ -257,6 +259,58 @@ model IdeaBox {
   employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
   @@map("idea_box")
+}
+
+model Categories {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name          String
+  subCategories SubCategories[]
+
+  @@map("categories")
+}
+
+model SubCategories {
+  id     String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name   String
+  
+  categoryId String     @db.Uuid
+  Category  Categories  @relation(fields: [categoryId], references: [id])
+
+  @@map("subCategories")
+}
+
+model Reactions {
+  id     String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid 
+  type        IconType?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  employeeId  String @db.Uuid
+  employee    Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade) 
+  publicationId     String    @db.Uuid
+  Publication Publication @relation(fields: [publicationId], references: [id])
+
+  @@map("reactions")
+}
+
+model Comments {
+  id     String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  text        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  employeeId  String @db.Uuid
+  employee    Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade) 
+  publicationId     String    @db.Uuid
+
+  @@map("comments")
+}
+
+enum IconType {
+  LIKE
+  LOVE
+  FUNNY
+  SUPPORT
+  CELEBRATE
+  INSIGHTFUL
 }
 
 enum PaymentMethod {

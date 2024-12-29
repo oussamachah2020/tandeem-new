@@ -1,31 +1,30 @@
 import {Main} from "@/common/components/global/Main";
 import {SectionName} from "@/common/security/Sections";
-import {GetServerSideProps, GetServerSidePropsResult, NextPage} from "next";
-import {AuthenticatedUser} from "@/common/services/AuthService";
-import {getToken} from "next-auth/jwt";
+import { NextPage } from "next";
+import { AuthenticatedUser } from "@/common/services/AuthService";
 import ActionBar from "@/common/components/global/ActionBar";
 import useSearch from "@/common/hooks/UseSearch";
 import useModal from "@/common/hooks/UseModal";
 import AdminTable from "@/domain/admins/components/AdminTable";
 import adminService from "@/domain/admins/services/AdminService";
-import {Modal} from "@/common/components/global/Modal";
+import { Modal } from "@/common/components/global/Modal";
 import AdminCreateForm from "@/domain/admins/components/AdminCreateForm";
 import useFilter from "@/common/hooks/UseFilter";
 import FilterGroup from "@/common/components/filter/FilterGroup";
 import Filter from "@/common/components/filter/Filter";
-import {ArrayElement} from "@/common/utils/types";
+import { ArrayElement } from "@/common/utils/types";
 import AdminUpdateForm from "@/domain/admins/components/AdminUpdateForm";
-import {md5Hash} from "@/common/utils/functions";
-import {useStaticValues} from "@/common/context/StaticValuesContext";
-import { getAuthStore } from "@/zustand/auth-store";
+import { useStaticValues } from "@/common/context/StaticValuesContext";
+import { useAuthStore } from "@/zustand/auth-store";
+import { useEffect, useState } from "react";
+import { RefreshCcw } from "lucide-react";
 
-interface Props {
-  user: AuthenticatedUser;
-  admins: Awaited<ReturnType<typeof adminService.getAll>>;
-}
+interface Props {}
 
-const Admins: NextPage<Props> = ({ user, admins }) => {
+const Admins: NextPage<Props> = () => {
   const { label, action } = useStaticValues();
+  const [admins, setAdmins] = useState<any[]>([]);
+
   const [searchResultedAdmins, onSearchInputChange] = useSearch(admins, [
     "name",
     "user.email" as any,
@@ -37,9 +36,35 @@ const Admins: NextPage<Props> = ({ user, admins }) => {
   const [, isAddAdminModalShown, toggleAddAdminModal] = useModal(false);
   const [adminToUpdate, isUpdateAdminModalShown, toggleAdminUpdateModal] =
     useModal<ArrayElement<typeof admins>>();
+  const { accessToken, authenticatedUser } = useAuthStore();
+  const [loading, setLoading] = useState(false);
+
+  const fetchAdmins = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch("/api/admins/read", {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      if (response.ok) {
+      }
+      const data = await response.json();
+      setAdmins(data);
+    } catch (err: any) {
+      console.error(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAdmins();
+  }, [authenticatedUser]);
+
 
   return (
-    <Main section={SectionName.Admins} user={user}>
+    <Main section={SectionName.Admins} user={authenticatedUser}>
       <ActionBar
         onSearchInputChange={onSearchInputChange}
         action={{
@@ -60,16 +85,22 @@ const Admins: NextPage<Props> = ({ user, admins }) => {
           }
         />
       </FilterGroup>
-      <AdminTable
-        admins={filteredResults}
-        onUpdate={(admin) => toggleAdminUpdateModal(true, admin)}
-      />
+      {loading ? (
+        <div className="h-40 flex justify-center items-center w-full bg-white">
+          <RefreshCcw className="h-10 w-10 animate-spin text-primary" />
+        </div>
+      ) : (
+        <AdminTable
+          admins={filteredResults}
+          onUpdate={(admin) => toggleAdminUpdateModal(true, admin)}
+        />
+      )}
       <Modal
         title={action.adminAdd}
         isShown={isAddAdminModalShown}
         onClose={() => toggleAddAdminModal(false)}
       >
-        <AdminCreateForm />
+        <AdminCreateForm onClose={() => toggleAddAdminModal(false)} />
       </Modal>
       <Modal
         title={action.adminUpdate}

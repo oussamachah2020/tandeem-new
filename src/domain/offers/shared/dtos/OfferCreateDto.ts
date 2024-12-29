@@ -2,17 +2,19 @@ import {Blob} from 'buffer'
 import {SubCategory, SubPaymentMethod} from "@prisma/client";
 
 export interface OfferCreateDto {
-    contractorId: string
-    title: string
-    description: string
-    category: SubCategory
-    subPaymentMethod: SubPaymentMethod
-    from: string
-    to: string
-    discount?: string
-    initialPrice?: string
-    finalPrice?: string
-    paymentDetails: string
+  contractorId: string;
+  title: string;
+  description: string;
+  category: SubCategory;
+  subPaymentMethod: SubPaymentMethod;
+  from: string;
+  to: string;
+  discount?: string;
+  initialPrice?: string;
+  finalPrice?: string;
+  paymentDetails: string;
+  imageUrl: string;
+  couponUrl: string;
 }
 
 export interface OfferCreateFilesDto {

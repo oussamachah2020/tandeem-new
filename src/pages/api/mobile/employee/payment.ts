@@ -36,15 +36,15 @@ export default async function handler(
         {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${process.env.YOUCANPAY_PRIVATE_KEY}`, // Replace with your key
+            Authorization: `Bearer ${process.env.YOUCANPAY_PRIVATE_KEY!}`, // Replace with your key
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
             amount,
             currency,
             order_id: payment.id,
-            redirect_url: `${process.env.NEXT_PUBLIC_BASE_URL}/payment/success`,
-            cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/payment/cancel`,
+            // redirect_url: `${process.env.NEXT_PUBLIC_BASE_URL}/payment/success`,
+            // cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/payment/cancel`,
           }),
         }
       );

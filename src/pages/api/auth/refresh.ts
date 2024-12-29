@@ -4,7 +4,7 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-const TOKEN_SECRET = process.env.JWT_PUBLIC_KEY!;
+const TOKEN_SECRET = process.env.JWT_PRIVATE_KEY!;
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse

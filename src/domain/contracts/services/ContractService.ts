@@ -4,34 +4,33 @@ import prisma from "@/common/libs/prisma";
 import staticValues from "@/common/context/StaticValues";
 
 class ContractService {
-    getAll = async () =>
-        await prisma
-            .contract
-            .findMany({
-                include: {
-                    partner: true,
-                    customer: true
-                }
-            })
+  getAll = async () =>
+    await prisma.contract.findMany({
+      include: {
+        partner: true,
+        customer: true,
+      },
+    });
 
-    updateOne = async (contractDto: ContractUpdateDto & EditContractFilesDto): Promise<keyof typeof staticValues.notification> => {
-        if (contractDto.scan) fileService.replace(contractDto.scanRef, contractDto.scan).then()
+  updateOne = async (
+    contractDto: ContractUpdateDto & EditContractFilesDto
+  ): Promise<keyof typeof staticValues.notification> => {
+    await prisma.contract.update({
+      where: {
+        id: contractDto.id,
+      },
+      data: {
+        from: new Date(contractDto.from),
+        to: new Date(contractDto.to),
+        prematureTo: contractDto.prematureTo
+          ? new Date(contractDto.prematureTo)
+          : null,
+        scan: contractDto.scanUrl,
+      },
+    });
 
-        await prisma
-            .contract
-            .update({
-                where: {
-                    id: contractDto.id
-                },
-                data: {
-                    from: new Date(contractDto.from),
-                    to: new Date(contractDto.to),
-                    prematureTo: contractDto.prematureTo ? new Date(contractDto.prematureTo) : null
-                }
-            })
-
-        return 'contractUpdatedSuccess'
-    }
+    return "contractUpdatedSuccess";
+  };
 }
 
 let contractService: ContractService;

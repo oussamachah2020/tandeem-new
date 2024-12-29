@@ -1,9 +1,9 @@
 import {Blob} from "buffer";
 
 export interface AdminUpdateDto {
-    adminId: string
-    photoRef: string
-    name: string
+  adminId: string;
+  photoUrl: string;
+  name: string;
 }
 
 export interface AdminUpdateFilesDto {

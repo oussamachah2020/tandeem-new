@@ -2,6 +2,7 @@ import Button from "@/common/components/atomic/Button";
 import { Input } from "@/common/components/atomic/Input";
 import { useStaticValues } from "@/common/context/StaticValuesContext";
 import { useAuthStore } from "@/zustand/auth-store";
+import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 
 // Define the form data type for TypeScript
@@ -21,18 +22,40 @@ type CustomerCreateFormData = {
   representativeEmail?: string;
 };
 
-export const CustomerCreateForm = () => {
+type Props = { onClose: () => void };
+
+export const CustomerCreateForm = ({ onClose }: Props) => {
   const { label, category, tooltip } = useStaticValues();
   const { accessToken } = useAuthStore();
-  // Initialize useForm hook
   const {
     control,
     handleSubmit,
     formState: { errors, isValid, isSubmitting },
     reset,
   } = useForm<CustomerCreateFormData>();
+  const [logo, setLogo] = useState<File | null>(null);
+  const [contract, setContract] = useState<File | null>(null);
 
   const onSubmit = async (data: CustomerCreateFormData) => {
+    // Format the data to match the required JSON structure
+    const customerData = {
+      name: data.name,
+      address: data.address,
+      category: data.category,
+      website: data.website || "",
+      logoUrl: data.logo || "", // Map logo to logoUrl
+      maxEmployees: Number(data.maxEmployees), // Convert to number
+      representativeName: data.representativeName,
+      representativeEmail: data.representativeEmail || "",
+      representativePhone: data.representativePhone || "",
+      contractFrom: new Date(
+        `${data.contractFrom}T00:00:00.000Z`
+      ).toISOString(),
+      contractTo: new Date(`${data.contractTo}T00:00:00.000Z`).toISOString(),
+      contractScan: data.contractScan || "",
+      email: data.email,
+    };
+
     try {
       const response = await fetch("/api/customers/create", {
         method: "POST",
@@ -40,14 +63,18 @@ export const CustomerCreateForm = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(customerData),
       });
 
       if (response.ok) {
         const result = await response.json();
+        console.log("Success:", result);
+        onClose();
         reset();
       } else {
-        const errorData = await response.json();
+        const responseText = await response.text();
+        console.error("Error status:", response.status);
+        console.error("Error response:", responseText);
       }
     } catch (error) {
       console.error("Error:", error);
@@ -120,15 +147,15 @@ export const CustomerCreateForm = () => {
                 />
               )}
             />
+
             <Controller
               name="logo"
               control={control}
               render={({ field }) => (
                 <Input
-                  icon="PhotoIcon"
+                  icon="MapPinIcon"
                   label={label.logo}
                   placeholder={label.logo}
-                  type="url"
                   {...field}
                 />
               )}
@@ -184,14 +211,14 @@ export const CustomerCreateForm = () => {
             control={control}
             render={({ field }) => (
               <Input
-                icon="DocumentTextIcon"
-                label={label.scan}
-                placeholder={label.scan}
-                type="url"
+                icon="MapPinIcon"
+                label={label.contract}
+                placeholder={label.contract}
                 {...field}
               />
             )}
           />
+
           <Controller
             name="contractFrom"
             control={control}
