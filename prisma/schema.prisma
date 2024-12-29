@@ -62,6 +62,7 @@ model Customer {
 
   offers       Offer[]       @relation()
   publications Publication[] @relation()
+  Survey Survey[]
 
   @@map("customer")
 }
@@ -104,6 +105,7 @@ model Employee {
   IdeaBox        IdeaBox[]
   Reactions Reactions[]
   Comments Comments[]
+  Survey Survey[]
 
   @@map("employee")
 }
@@ -123,6 +125,8 @@ model Offer {
   paymentDetails   Json             @db.JsonB
   latitude         BigInt?
   longitude        BigInt?
+  isSurvey   Boolean       @default(false)
+
   status           OfferStatusName  @default(Active)
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
@@ -173,6 +177,23 @@ model Partner {
   offers Offer[] @relation
 
   @@map("partner")
+  Survey Survey[]
+}
+
+model Survey {
+  id        String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title     String
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  isSurvey   Boolean       @default(true)
+  paul      Json[]
+
+  employeeId String     @db.Uuid
+  employee Employee @relation(fields: [employeeId], references: [id])
+customerId String?   @db.Uuid
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  partnerId  String?   @db.Uuid
+  partner    Partner?  @relation(fields: [partnerId], references: [id], onDelete: Cascade)
 }
 
 model Representative {

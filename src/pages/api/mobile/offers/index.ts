@@ -79,6 +79,26 @@ export default async (req: TypedNextApiRequest, res: NextApiResponse) => {
         discount: true,
         createdAt: true,
         paymentDetails: true,
+        isSurvey: true,
+      },
+      orderBy: { createdAt: SortOrder.desc },
+      skip,
+      take: pageSize,
+    });
+
+    const surveys = await prisma.survey.findMany({
+      where: {
+        customerId: employee.customerId,
+      },
+      select: {
+        id: true,
+        title: true,
+        createdAt: true,
+        updatedAt: true,
+        paul: true,
+        isSurvey: true,
+        customer: true,
+        partner: true,
       },
       orderBy: { createdAt: SortOrder.desc },
       skip,
@@ -106,6 +126,7 @@ export default async (req: TypedNextApiRequest, res: NextApiResponse) => {
         category:
           staticValues.subCategory[result.category as keyof typeof SubCategory],
       })),
+      surveys,
     });
   } else {
     res.status(constants.HTTP_STATUS_NOT_FOUND).end();
