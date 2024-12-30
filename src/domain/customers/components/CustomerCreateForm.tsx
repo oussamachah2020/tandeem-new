@@ -2,8 +2,10 @@ import Button from "@/common/components/atomic/Button";
 import { Input } from "@/common/components/atomic/Input";
 import { useStaticValues } from "@/common/context/StaticValuesContext";
 import { useAuthStore } from "@/zustand/auth-store";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
+import { storage } from "../../../../firebase";
 
 // Define the form data type for TypeScript
 type CustomerCreateFormData = {
@@ -36,27 +38,36 @@ export const CustomerCreateForm = ({ onClose }: Props) => {
   const [logo, setLogo] = useState<File | null>(null);
   const [contract, setContract] = useState<File | null>(null);
 
-  const onSubmit = async (data: CustomerCreateFormData) => {
-    // Format the data to match the required JSON structure
-    const customerData = {
-      name: data.name,
-      address: data.address,
-      category: data.category,
-      website: data.website || "",
-      logoUrl: data.logo || "", // Map logo to logoUrl
-      maxEmployees: Number(data.maxEmployees), // Convert to number
-      representativeName: data.representativeName,
-      representativeEmail: data.representativeEmail || "",
-      representativePhone: data.representativePhone || "",
-      contractFrom: new Date(
-        `${data.contractFrom}T00:00:00.000Z`
-      ).toISOString(),
-      contractTo: new Date(`${data.contractTo}T00:00:00.000Z`).toISOString(),
-      contractScan: data.contractScan || "",
-      email: data.email,
-    };
+  const uploadFileToFirebase = async (file: File, path: string) => {
+    const storageRef = ref(storage, path);
+    await uploadBytes(storageRef, file);
+    return getDownloadURL(storageRef);
+  };
 
+  const onSubmit = async (data: CustomerCreateFormData) => {
     try {
+      // Upload logo to Firebase if provided
+      const logoUrl = logo
+        ? await uploadFileToFirebase(logo, `logos/${logo.name}`)
+        : "";
+
+      // Upload contract scan to Firebase if provided
+      const contractUrl = contract
+        ? await uploadFileToFirebase(contract, `contracts/${contract.name}`)
+        : "";
+
+      // Format the data to match the required JSON structure
+      const customerData = {
+        ...data,
+        logoUrl, // Firebase URL for logo
+        contractScan: contractUrl, // Firebase URL for contract scan
+        contractFrom: new Date(
+          `${data.contractFrom}T00:00:00.000Z`
+        ).toISOString(),
+        contractTo: new Date(`${data.contractTo}T00:00:00.000Z`).toISOString(),
+        maxEmployees: Number(data.maxEmployees),
+      };
+
       const response = await fetch("/api/customers/create", {
         method: "POST",
         headers: {
@@ -77,7 +88,7 @@ export const CustomerCreateForm = ({ onClose }: Props) => {
         console.error("Error response:", responseText);
       }
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error uploading files or submitting form:", error);
     }
   };
 
@@ -153,10 +164,15 @@ export const CustomerCreateForm = ({ onClose }: Props) => {
               control={control}
               render={({ field }) => (
                 <Input
-                  icon="MapPinIcon"
+                  {...field}
+                  icon="PhotoIcon"
                   label={label.logo}
                   placeholder={label.logo}
-                  {...field}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    if (e?.target?.files) setLogo(e?.target?.files[0]);
+                  }}
+                  type="file"
+                  accept="image"
                 />
               )}
             />
@@ -211,10 +227,15 @@ export const CustomerCreateForm = ({ onClose }: Props) => {
             control={control}
             render={({ field }) => (
               <Input
-                icon="MapPinIcon"
+                {...field}
+                icon="PhotoIcon"
                 label={label.contract}
                 placeholder={label.contract}
-                {...field}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  if (e?.target?.files) setContract(e?.target?.files[0]);
+                }}
+                type="file"
+                accept="doc"
               />
             )}
           />

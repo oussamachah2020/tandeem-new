@@ -54,6 +54,8 @@ const CustomerTable: FC<Props> = ({ customers, onUpdate, onClick }) => {
     });
   }, [sortField, sortOrder, customers]);
 
+  console.log(customers);
+
   return (
     <Datatable
       headers={[
@@ -80,7 +82,11 @@ const CustomerTable: FC<Props> = ({ customers, onUpdate, onClick }) => {
           }}
         >
           <DatatableValue className="flex items-center gap-5">
-            <ImagePreview imageRef={customer.logo} />
+            <img
+              src={customer.logo}
+              alt="logo"
+              className="w-20 rounded-md h-20 object-contain"
+            />
             {customer.name}
           </DatatableValue>
           <DatatableValue>{customer.address}</DatatableValue>

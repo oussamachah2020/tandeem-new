@@ -54,6 +54,8 @@ const PartnerTable: FC<Props> = ({ partners, onUpdate, onClick }) => {
     });
   }, [sortField, sortOrder, partners]);
 
+  console.log(partners);
+
   return (
     <Datatable
       headers={[
@@ -81,7 +83,11 @@ const PartnerTable: FC<Props> = ({ partners, onUpdate, onClick }) => {
           }}
         >
           <DatatableValue className="flex items-center gap-5">
-            <ImagePreview imageRef={partner.logo} />
+            <img
+              src={partner.logo}
+              alt="partner-logo"
+              className="w-24 h-24 rounded-md object-contain"
+            />
             {partner.name}
           </DatatableValue>
           <DatatableValue className="truncate w-[180px]">

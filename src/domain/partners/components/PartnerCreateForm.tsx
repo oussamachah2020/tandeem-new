@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage"; // Firebase storage methods
 import { v4 as uuidv4 } from "uuid"; // To generate unique file names
 import { storage } from "../../../../firebase";
+import { PartnerCreateDto } from "../dtos/PartnerCreateDto";
 
 type Props = {
   onClose: () => void;
@@ -45,13 +46,6 @@ export const PartnerCreateForm = ({ onClose }: Props) => {
       throw new Error("No file provided");
     }
 
-    // Validate file size (e.g., max 5MB)
-    const maxSize = 5 * 1024 * 1024; // 5MB
-    if (file.size > maxSize) {
-      throw new Error(`File size exceeds ${maxSize / 1024 / 1024}MB limit`);
-    }
-
-    // Create a reference with a specific path and file name
     const fileName = `${uuidv4()}_${file.name}`;
     const fileRef = ref(storage, `${folder}/${fileName}`);
 
@@ -61,7 +55,6 @@ export const PartnerCreateForm = ({ onClose }: Props) => {
       uploadTask.on(
         "state_changed",
         (snapshot) => {
-          // You can add progress tracking here if needed
           const progress =
             (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
           console.log(`Upload progress: ${progress}%`);
@@ -87,30 +80,30 @@ export const PartnerCreateForm = ({ onClose }: Props) => {
     toast.loading("Un moment...", { id: "create" });
 
     try {
-      const partnerData: any = {
+      const partnerData: PartnerCreateDto = {
         name: data.name,
         address: data.address,
         website: data.website,
         category: data.category,
         accepts: data.accepts,
-        contractFrom: new Date(data.contractFrom),
-        contractTo: new Date(data.contractTo),
+        contractFrom: new Date(data.contractFrom).toISOString(),
+        contractTo: new Date(data.contractTo).toISOString(),
         representativeName: data.representativeName,
         representativePhone: data.representativePhone,
         representativeEmail: data.representativeEmail,
+        contractScanUrl: "",
+        logoUrl: "",
       };
 
-      if (data.logo && data.logo.length > 0) {
-        const logoUrl = await uploadFile(data.logo[0], "logos");
-        partnerData.logoUrl = logoUrl;
+      if (data.logo) {
+        partnerData.logoUrl = await uploadFile(data.logo, "logos");
       }
 
-      if (data.contractScan && data.contractScan.length > 0) {
-        const contractScanUrl = await uploadFile(
-          data.contractScan[0],
+      if (data.contractScan) {
+        partnerData.contractScanUrl = await uploadFile(
+          data.contractScan,
           "contracts"
         );
-        partnerData.scanUrl = contractScanUrl;
       }
 
       const response = await fetch("/api/partners/create", {
@@ -123,16 +116,16 @@ export const PartnerCreateForm = ({ onClose }: Props) => {
       });
 
       if (response.ok) {
-        onClose();
+        toast.success("Partenaire créé avec succès", { id: "create" });
         reset();
-        toast.success("Partenaire créé avec succès");
+        onClose();
       } else {
-        const responseText = await response.text();
-        console.error("Error status:", response.status);
-        console.error("Error response:", responseText);
+        const errorText = await response.text();
+        toast.error(`Erreur: ${errorText}`, { id: "create" });
       }
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error creating partner:", error);
+      toast.error("Erreur lors de la création du partenaire", { id: "create" });
     } finally {
       toast.dismiss("create");
     }
@@ -217,6 +210,9 @@ export const PartnerCreateForm = ({ onClose }: Props) => {
                   placeholder={label.logo}
                   type="file"
                   accept="image"
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    field.onChange(e.target.files ? e.target.files[0] : null);
+                  }}
                 />
               )}
             />
@@ -250,9 +246,11 @@ export const PartnerCreateForm = ({ onClose }: Props) => {
                 {...field}
                 icon="DocumentTextIcon"
                 label={label.scan}
-                placeholder={label.scan}
                 type="file"
                 accept="doc"
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  field.onChange(e.target.files ? e.target.files[0] : null);
+                }}
               />
             )}
           />

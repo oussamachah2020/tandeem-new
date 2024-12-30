@@ -25,9 +25,6 @@ class PartnerService {
   addOne = async (
     partnerDto: PartnerCreateDto
   ): Promise<keyof typeof staticValues.notification> => {
-    // const logo = await fileService.save('logo', partnerDto.logo);
-    // const scan = await fileService.save('scan', partnerDto.contractScan);
-
     await prisma.partner.create({
       data: {
         name: partnerDto.name,
@@ -47,7 +44,7 @@ class PartnerService {
           create: {
             from: new Date(partnerDto.contractFrom),
             to: new Date(partnerDto.contractTo),
-            scan: partnerDto.scanUrl,
+            scan: partnerDto.contractScanUrl,
           },
         },
       },
