@@ -81,7 +81,7 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
         id: true,
         title: true,
         content: true,
-        photo: true,
+        photos: true,
         pinned: true,
         createdAt: true,
         reactions: {
@@ -116,7 +116,7 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
         id: true,
         title: true,
         content: true,
-        photo: true,
+        photos: true,
         pinned: true,
         createdAt: true,
         reactions: {

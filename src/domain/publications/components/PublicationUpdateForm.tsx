@@ -29,7 +29,7 @@ const PublicationUpdateForm: FC<Props> = ({ publication, onClose }) => {
 
     // Check if there is a file uploaded for the image
     const imageFile = formData.get("image") as File | null;
-    let photoUrl = publication.photo; // Use existing image URL if no new file is uploaded
+    let photoUrl = publication.photos[0]; // Use existing image URL if no new file is uploaded
 
     // If a new file is uploaded, we'll assume the backend can handle it and process the URL
     if (imageFile) {
@@ -74,7 +74,7 @@ const PublicationUpdateForm: FC<Props> = ({ publication, onClose }) => {
   return (
     <form onSubmit={handleSubmit} encType="multipart/form-data">
       <input name="id" value={publication.id} className="hidden" />
-      <input name="imageRef" value={publication.photo} className="hidden" />
+      <input name="imageRef" value={publication.photos[0]} className="hidden" />
       <div className="flex flex-col gap-6">
         <div className="grid grid-cols-2 gap-4">
           <Input
