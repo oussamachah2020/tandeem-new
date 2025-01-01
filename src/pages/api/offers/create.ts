@@ -1,4 +1,4 @@
-import { NextApiRequest, NextApiResponse } from "next";
+import { NextApiResponse } from "next";
 import {
   NAPaymentDetails,
   OfferCreateDto,
@@ -30,14 +30,14 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
     if (roleLevel === 1) {
       const result = await offerService.addLevel1Offer({
         ...payload,
-        image: payload.imageUrl,
-        coupon: payload.couponUrl,
+        imageUrl: payload.imageUrl,
+        couponUrl: payload.couponUrl,
       });
       return res.status(200).json(result);
     } else if (roleLevel === 2) {
       const result = await offerService.addLevel2Offer({
         ...payload,
-        image: payload.imageUrl,
+        imageUrl: payload.imageUrl,
         contractorId: req.user?.customer.id ?? "",
         paymentDetails: JSON.stringify({
           description: payload.paymentDetails,

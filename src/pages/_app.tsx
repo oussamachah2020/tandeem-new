@@ -22,20 +22,29 @@ const App = ({ Component, pageProps }: AppProps) => {
     keyof typeof staticValues.notification | null
   >(null);
   // const router = useRouter();
-  // const accessToken = useAuthStore((state) => state.accessToken); // Get the token from Zustand
+  // const token = useAuthStore((state) => state.accessToken); // Get the token from Zustand store
 
   // useEffect(() => {
-  //   const isExpired = isTokenExpired(accessToken);
-  //   if (accessToken) {
-  //     if (!isExpired) {
+  //   // Define routes that are allowed without a token
+  //   const publicRoutes = ["/login"]; // Add any other public routes here
+
+  //   // Check if the token exists
+  //   if (token) {
+  //     // If the token exists and the user is on a public route, redirect to /dashboard
+  //     if (publicRoutes.includes(router.pathname)) {
   //       router.replace("/dashboard");
-  //     } else {
-  //       router.replace("/login");
+  //     }
+
+  //     if (router.pathname !== "/dashboard" && router.pathname !== "/login") {
+  //       router.replace(router.pathname);
   //     }
   //   } else {
-  //     router.replace("/login");
+  //     // If the token does not exist and the user is not on a public route, redirect to /login
+  //     if (!publicRoutes.includes(router.pathname)) {
+  //       router.replace("/login");
+  //     }
   //   }
-  // }, [accessToken]);
+  // }, [token, router.pathname]);
 
   return (
     <>

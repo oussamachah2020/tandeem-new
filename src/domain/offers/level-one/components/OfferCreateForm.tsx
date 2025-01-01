@@ -1,15 +1,18 @@
-import {ChangeEvent, FC, useState} from "react";
-import {Input} from "@/common/components/atomic/Input";
+import { ChangeEvent, FC, useState } from "react";
+import { Input } from "@/common/components/atomic/Input";
 import partnerService from "@/domain/partners/services/PartnerService";
-import {getLabeledSubCategories} from "@/common/utils/functions";
-import {EitherInput} from "@/common/components/atomic/EitherInput";
-import {PaymentMethod} from "@prisma/client";
-import {PromoCodeForm} from "@/domain/offers/level-one/components/PromoCodeForm";
-import {ArrayElement} from "@/common/utils/types";
-import Form from "@/common/components/global/Form";
-import {useStaticValues} from "@/common/context/StaticValuesContext";
+import { getLabeledSubCategories } from "@/common/utils/functions";
+import { EitherInput } from "@/common/components/atomic/EitherInput";
+import { PaymentMethod, SubCategory, SubPaymentMethod } from "@prisma/client";
+import { PromoCodeForm } from "@/domain/offers/level-one/components/PromoCodeForm";
+import { ArrayElement } from "@/common/utils/types";
+import { useStaticValues } from "@/common/context/StaticValuesContext";
 import CouponForm from "@/domain/offers/level-one/components/CouponForm";
 import { PlusIcon } from "@heroicons/react/24/outline";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { OfferCreateDto } from "../../shared/dtos/OfferCreateDto";
+import { storage } from "../../../../../firebase";
+import { useAuthStore } from "@/zustand/auth-store";
 
 interface Props {
   partners: Awaited<ReturnType<typeof partnerService.getAll>>;
@@ -22,6 +25,7 @@ export const OfferCreateForm = ({ partners }: Props) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   const handlePartnerSelect = (e: ChangeEvent<HTMLSelectElement>) => {
     const partner = partners.find(
@@ -30,15 +34,47 @@ export const OfferCreateForm = ({ partners }: Props) => {
     setSelectedPartner(partner);
   };
 
+  const handleImageUpload = async (file: File) => {
+    if (!file) return null;
+
+    const storageRef = ref(storage, `offers/${file.name}`);
+    await uploadBytes(storageRef, file);
+    return getDownloadURL(storageRef);
+  };
+
   const handleSubmit = async (formData: FormData) => {
     setIsSubmitting(true);
     setError(null);
     setSuccess(null);
 
     try {
+      // Upload image to Firebase Storage
+      const imageUrl = imageFile ? await handleImageUpload(imageFile) : null;
+
+      // Construct the OfferCreateDto object
+      const offerData: OfferCreateDto = {
+        contractorId: formData.get("contractorId") as string,
+        title: formData.get("title") as string,
+        description: formData.get("description") as string,
+        category: formData.get("category") as SubCategory,
+        subPaymentMethod: formData.get("subPaymentMethod") as SubPaymentMethod,
+        from: formData.get("from") as string,
+        to: formData.get("to") as string,
+        discount: formData.get("discount") as string,
+        initialPrice: formData.get("initialPrice") as string,
+        finalPrice: formData.get("finalPrice") as string,
+        paymentDetails: formData.get("paymentDetails") as string,
+        imageUrl: imageUrl || "",
+        couponUrl: formData.get("couponUrl") as string,
+      };
+
+      // Send the data to the API endpoint
       const response = await fetch("/api/offers/create", {
         method: "POST",
-        body: formData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(offerData),
       });
 
       if (!response.ok) {
@@ -73,6 +109,7 @@ export const OfferCreateForm = ({ partners }: Props) => {
         label={label.description}
         placeholder={label.description}
         type="textarea"
+        className="mt-2"
       />
       <div className="grid grid-cols-2 gap-x-4 gap-y-3">
         <Input
@@ -162,6 +199,11 @@ export const OfferCreateForm = ({ partners }: Props) => {
         accept="image"
         tooltip={tooltip.sixteenByNineAspectRatio}
         className="mt-3"
+        onChange={(e: ChangeEvent<HTMLInputElement>) => {
+          if (e.target.files && e.target.files[0]) {
+            setImageFile(e.target.files[0]);
+          }
+        }}
       />
       {error && <p className="text-red-500">{error}</p>}
       {success && <p className="text-green-500">{success}</p>}

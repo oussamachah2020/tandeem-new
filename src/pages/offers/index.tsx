@@ -1,8 +1,6 @@
-import {GetServerSideProps, GetServerSidePropsResult, NextPage} from "next";
-import {AuthenticatedUser} from "@/common/services/AuthService";
-import {Main} from "@/common/components/global/Main";
-import {SectionName} from "@/common/security/Sections";
-import { ChangeEvent, useEffect } from "react";
+import { Main } from "@/common/components/global/Main";
+import { SectionName } from "@/common/security/Sections";
+import { ChangeEvent, useEffect, useState } from "react";
 import useSearch from "@/common/hooks/UseSearch";
 import useFilter from "@/common/hooks/UseFilter";
 import ActionBar from "@/common/components/global/ActionBar";
@@ -13,9 +11,7 @@ import { Modal } from "@/common/components/global/Modal";
 import { OfferCreateForm } from "@/domain/offers/level-one/components/OfferCreateForm";
 import OfferDetails from "@/domain/offers/level-one/components/OfferDetails";
 import useModal from "@/common/hooks/UseModal";
-import { getToken } from "next-auth/jwt";
 import offerService from "@/domain/offers/shared/services/OfferService";
-import partnerService from "@/domain/partners/services/PartnerService";
 import { labeledOfferStatuses } from "@/common/utils/statics";
 import OfferUpdateForm from "@/domain/offers/level-one/components/OfferUpdateForm";
 import { ArrayElement } from "@/common/utils/types";
@@ -24,11 +20,13 @@ import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/zustand/auth-store";
 
 interface Props {
-  partners: Awaited<ReturnType<typeof partnerService.getAll>>;
+  // partners: Awaited<ReturnType<typeof partnerService.getAll>>;
   offers: Awaited<ReturnType<typeof offerService.getAllForLevel1>>;
 }
 
-const Offers = ({ offers, partners }: Props) => {
+type Partner = Awaited<ReturnType<typeof partnerService.getAll>>;
+
+const Offers = ({ offers }: Props) => {
   const [, isAddOfferModalShown, toggleAddOfferModal] = useModal(false);
   const [offerToShow, isOfferModalShown, toggleOfferModal] =
     useModal<ArrayElement<typeof offers>>();
@@ -40,8 +38,33 @@ const Offers = ({ offers, partners }: Props) => {
     searchResultedOffers,
     ["partner.id" as any, "status"]
   );
-  const { authenticatedUser } = useAuthStore();
+  const { authenticatedUser, accessToken } = useAuthStore();
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [partners, setPartners] = useState<Partner[]>([]);
+
+  const fetchPartners = async () => {
+    setLoading(true);
+
+    try {
+      const response = await fetch("/api/partners/read", {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      if (!response.ok) throw new Error("Failed to fetch customers.");
+      const data = await response.json();
+      setPartners(data);
+    } catch (err: any) {
+      console.error(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPartners();
+  }, [authenticatedUser]);
 
   useEffect(() => {
     if (authenticatedUser) {
@@ -90,7 +113,7 @@ const Offers = ({ offers, partners }: Props) => {
         onClose={() => toggleAddOfferModal(false)}
         width=""
       >
-        <OfferCreateForm partners={partners ?? []} />
+        <OfferCreateForm partners={partners} />
       </Modal>
       <Modal
         title="Détails de l'offre"
@@ -110,6 +133,5 @@ const Offers = ({ offers, partners }: Props) => {
     </>
   );
 };
-
 
 export default Offers;

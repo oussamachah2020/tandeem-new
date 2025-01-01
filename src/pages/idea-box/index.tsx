@@ -13,6 +13,7 @@ import useSearch from "@/common/hooks/UseSearch";
 import useFilter from "@/common/hooks/UseFilter";
 import {useStaticValues} from "@/common/context/StaticValuesContext";
 import EmptyContent from "@/common/components/atomic/EmptyContent";
+import { useAuthStore } from "@/zustand/auth-store";
 
 interface Props {
     user: AuthenticatedUser
@@ -30,27 +31,32 @@ const IdeaBox: NextPage<Props> = ({user, ideas}) => {
 
     const [searchResultedIdeas, onSearchInputChange] = useSearch(ideas, ['title', 'employee.firstName' as any, 'employee.lastName' as any])
     const [filteredIdeas, onFilterValueChange] = useFilter(searchResultedIdeas, ['employee.id' as any])
-
+    const { authenticatedUser } = useAuthStore();
     return (
-        <>
-            <Main section={SectionName.IdeaBox} user={user}>
-                <ActionBar onSearchInputChange={onSearchInputChange}/>
-                <FilterGroup>
-                    <Filter
-                        label={label.employee}
-                        icon='UserIcon'
-                        values={Object.entries(employees)}
-                        onValueChange={(e: any) => onFilterValueChange('employee.id' as any, e)}
-                    />
-                </FilterGroup>
-                {filteredIdeas.length > 0 ?
-                    <div className='grid grid-cols-3 gap-4'>
-                        {filteredIdeas.map((idea, idx) =>
-                            <IdeaBoxCard key={idx} idea={idea}/>)}
-                    </div>
-                    : <EmptyContent/>}
-            </Main>
-        </>
+      <>
+        <Main section={SectionName.IdeaBox} user={authenticatedUser}>
+          <ActionBar onSearchInputChange={onSearchInputChange} />
+          <FilterGroup>
+            <Filter
+              label={label.employee}
+              icon="UserIcon"
+              values={Object.entries(employees)}
+              onValueChange={(e: any) =>
+                onFilterValueChange("employee.id" as any, e)
+              }
+            />
+          </FilterGroup>
+          {filteredIdeas.length > 0 ? (
+            <div className="grid grid-cols-3 gap-4">
+              {filteredIdeas.map((idea, idx) => (
+                <IdeaBoxCard key={idx} idea={idea} />
+              ))}
+            </div>
+          ) : (
+            <EmptyContent />
+          )}
+        </Main>
+      </>
     );
 }
 

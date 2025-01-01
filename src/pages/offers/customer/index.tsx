@@ -10,6 +10,7 @@ import {ExternalOffers} from "@/domain/offers/level-two/components/ExternalOffer
 import {InternalOffers} from "@/domain/offers/level-two/components/InternalOffers";
 import customerService from "@/domain/customers/services/CustomerService";
 import {AcceptableOffer} from "@/domain/offers/level-two/models/AcceptableOffer";
+import { useAuthStore } from "@/zustand/auth-store";
 
 interface Props {
     user: AuthenticatedUser
@@ -33,20 +34,33 @@ const OffersPage: NextPage<Props> = ({user, customer, offers}) => {
             ), [offers, user.customer?.id])
     const [selectedTab, setSelectedTab] = useState(0)
 
+    const { authenticatedUser } = useAuthStore();
+
     return (
-        <Main section={SectionName.Offers} user={user}>
-            <Tab
-                tabs={[
-                    {text: 'Les plans tandeem', icon: 'ReceiptPercentIcon', onClick: () => setSelectedTab(0)},
-                    {text: 'Mes offres exclusives', icon: 'TicketIcon', onClick: () => setSelectedTab(1)}
-                ]}
-                selectedTabIndex={selectedTab}
-            >
-                {selectedTab === 0 ? <ExternalOffers offers={acceptableOffers}/> :
-                    <InternalOffers customer={customer}/>}
-            </Tab>
-        </Main>
-    )
+      <Main section={SectionName.Offers} user={authenticatedUser}>
+        <Tab
+          tabs={[
+            {
+              text: "Les plans tandeem",
+              icon: "ReceiptPercentIcon",
+              onClick: () => setSelectedTab(0),
+            },
+            {
+              text: "Mes offres exclusives",
+              icon: "TicketIcon",
+              onClick: () => setSelectedTab(1),
+            },
+          ]}
+          selectedTabIndex={selectedTab}
+        >
+          {selectedTab === 0 ? (
+            <ExternalOffers offers={acceptableOffers} />
+          ) : (
+            <InternalOffers customer={customer} />
+          )}
+        </Tab>
+      </Main>
+    );
 }
 
 

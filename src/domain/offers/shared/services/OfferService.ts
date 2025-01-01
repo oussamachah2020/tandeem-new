@@ -273,14 +273,13 @@ class OfferService {
   };
 
   addLevel2Offer = async (
-    offerDto: OfferCreateDto & Omit<OfferCreateFilesDto, "coupon">
+    offerDto: OfferCreateDto
   ): Promise<keyof typeof staticValues.notification> => {
-    const image = await fileService.save("posts/offers", offerDto.image);
     await prisma.offer.create({
       data: {
         title: offerDto.title,
         description: offerDto.description,
-        image,
+        image: offerDto.imageUrl,
         category: offerDto.category,
         from: new Date(offerDto.from),
         to: new Date(offerDto.to),
