@@ -86,26 +86,26 @@ const ForgotPassword: NextPage<Props> = ({email, token}) => {
     );
 }
 
-export const getServerSideProps: GetServerSideProps = async ({query}) => {
-    const {token} = query
-    if (token) {
-        const user = await prisma
-            .user
-            .findUnique({where: {resetToken: token as string}})
-        if (user) {
-            return user.resetTokenExpiresAt! < new Date()
-                ? {redirect: {destination: '/login?_notif=resetTokenExpired', permanent: true}}
-                : {props: {email: user.email, token}}
-        }
-    }
-    return {
-        redirect: {
-            destination: '/login?_notif=resetTokenInvalid',
-            permanent: true
-        }
-    }
+// export const getServerSideProps: GetServerSideProps = async ({query}) => {
+//     const {token} = query
+//     if (token) {
+//         const user = await prisma
+//             .user
+//             .findUnique({where: {resetToken: token as string}})
+//         if (user) {
+//             return user.resetTokenExpiresAt! < new Date()
+//                 ? {redirect: {destination: '/login?_notif=resetTokenExpired', permanent: true}}
+//                 : {props: {email: user.email, token}}
+//         }
+//     }
+//     return {
+//         redirect: {
+//             destination: '/login?_notif=resetTokenInvalid',
+//             permanent: true
+//         }
+//     }
 
-}
+// }
 
 const validateResetPasswordForm: FormValidator = async (formData) => {
     const messages = await validate(

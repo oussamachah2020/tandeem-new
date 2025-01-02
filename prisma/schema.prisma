@@ -39,16 +39,16 @@ model Publication {
 }
 
 model Customer {
-  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name         String
-  address      String
-  website      String
-  logo         String
-  category     Category @default(NA)
-  maxEmployees Int
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name             String
+  address          String
+  website          String
+  logo             String
+  category         Category @default(NA)
+  maxEmployees     Int
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  archived         Boolean @default(false)
   representativeId String         @unique @db.Uuid
   representative   Representative @relation(fields: [representativeId], references: [id], onDelete: NoAction)
   contractId       String         @unique @db.Uuid

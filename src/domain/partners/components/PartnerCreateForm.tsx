@@ -338,12 +338,6 @@ export const PartnerCreateForm = ({ onClose }: Props) => {
       >
         Ajouter <PlusIcon className="h-4 w-4" />
       </button>
-      {/* <Button
-        type="submit"
-        icon={"PlusIcon"}
-        text={"Ajouter"}
-        className="w-full mt-5"
-      /> */}
     </form>
   );
 };

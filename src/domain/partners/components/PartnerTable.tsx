@@ -54,8 +54,6 @@ const PartnerTable: FC<Props> = ({ partners, onUpdate, onClick }) => {
     });
   }, [sortField, sortOrder, partners]);
 
-  console.log(partners);
-
   return (
     <Datatable
       headers={[
