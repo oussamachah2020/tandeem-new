@@ -14,9 +14,9 @@ class CustomerService {
       include: {
         representative: true,
         contract: true,
-        employees: {
+        _count: {
           select: {
-            _count: true,
+            employees: true, // Directly include the count of employees
           },
         },
         users: {
@@ -78,10 +78,10 @@ class CustomerService {
       },
     });
 
-    // await mailService.sendAccountDetails(
-    //   { name: customerDto.name, address: customerDto.email },
-    //   rawPassword
-    // );
+    await mailService.sendAccountDetails(
+      { name: customerDto.name, address: customerDto.email },
+      rawPassword
+    );
     return "customerAddedSuccess";
   };
 

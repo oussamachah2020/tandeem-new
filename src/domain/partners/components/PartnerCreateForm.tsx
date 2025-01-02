@@ -9,6 +9,7 @@ import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage"; //
 import { v4 as uuidv4 } from "uuid"; // To generate unique file names
 import { storage } from "../../../../firebase";
 import { PartnerCreateDto } from "../dtos/PartnerCreateDto";
+import { PlusIcon } from "lucide-react";
 
 type Props = {
   onClose: () => void;
@@ -331,12 +332,18 @@ export const PartnerCreateForm = ({ onClose }: Props) => {
           />
         </div>
       </div>
-      <Button
+      <button
+        type="submit"
+        className="w-full rounded-md mt-3 h-12 bg-orange-500 text-white flex flex-row justify-center items-center gap-3"
+      >
+        Ajouter <PlusIcon className="h-4 w-4" />
+      </button>
+      {/* <Button
         type="submit"
         icon={"PlusIcon"}
         text={"Ajouter"}
         className="w-full mt-5"
-      />
+      /> */}
     </form>
   );
 };

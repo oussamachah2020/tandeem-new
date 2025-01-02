@@ -27,52 +27,6 @@ interface Props {
   partners: Awaited<ReturnType<typeof partnerService.getAllIncludeOffers>>;
 }
 
-// const data = [
-//   {
-//     id: "P001",
-//     name: "Tech Solutions Inc.",
-//     logo: "https://example.com/logo-techsolutions.png",
-//     address: "123 Innovation Drive, Tech Citydiuhdiuwhdiuewhdiuwjebdijudewdq",
-//     category: "IT Services",
-//     paymentMethod: "Credit Card",
-//     contract: {
-//       id: "C12345",
-//       status: "Active",
-//       from: new Date("2024-01-01"),
-//       to: new Date("2024-12-31"),
-//     },
-//   },
-//   {
-//     id: "P002",
-//     name: "Global Marketing Ltd.",
-//     logo: "https://example.com/logo-globalmarketing.png",
-//     address: "456 Market Street, Business Town",
-//     category: "Marketing",
-//     paymentMethod: "Bank Transfer",
-//     contract: {
-//       id: "C67890",
-//       status: "Terminated",
-//       from: new Date("2023-06-15"),
-//       to: new Date("2023-12-31"),
-//       prematureTo: new Date("2023-11-01"),
-//     },
-//   },
-//   {
-//     id: "P003",
-//     name: "HealthCare Plus",
-//     logo: "https://example.com/logo-healthcareplus.png",
-//     address: "789 Wellness Way, Health City",
-//     category: "Healthcare",
-//     paymentMethod: "PayPal",
-//     contract: {
-//       id: "C54321",
-//       status: "Pending",
-//       from: new Date("2024-03-01"),
-//       to: new Date("2024-12-31"),
-//     },
-//   },
-// ];
-
 const Partners: NextPage<Props> = () => {
   const { label, action, category } = useStaticValues();
   const [, isAddPartnerModalShown, toggleAddPartnerModal] = useModal(false);

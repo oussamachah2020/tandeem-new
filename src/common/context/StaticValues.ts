@@ -65,6 +65,7 @@ const staticValues = {
     value: "Valeur",
     conditions: "Conditions",
     maxNumberOfEmployees: "Nombre max de salariés",
+    totalEmployees: "Nombre total d'employés",
   },
   action: {
     disable: "Désactiver",

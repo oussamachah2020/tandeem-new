@@ -73,6 +73,7 @@ const Contracts = () => {
     ["partner.name" as any, "customer.name" as any]
   );
 
+
   return (
     <>
       <Main section={SectionName.Contracts} user={authenticatedUser}>
@@ -117,14 +118,10 @@ const Contracts = () => {
               {searchResultedContracts?.map((contract) => (
                 <DatatableRow key={contract.id}>
                   <DatatableValue>
-                    <a
-                      href={contract.scan}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="underline text-primary"
-                    >
-                      Voir le contrat
-                    </a>
+                    {/* <embed
+                      src={contract.scan}
+                      className="h-20 rounded-md w-20 object-contain"
+                    /> */}
                   </DatatableValue>
                   <DatatableValue>
                     {formatDate(new Date(contract.from))}
