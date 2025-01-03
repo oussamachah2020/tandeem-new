@@ -6,6 +6,7 @@ import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { storage } from "../../../../firebase";
+import toast from "react-hot-toast";
 
 // Define the form data type for TypeScript
 type CustomerCreateFormData = {
@@ -45,6 +46,7 @@ export const CustomerCreateForm = ({ onClose }: Props) => {
   };
 
   const onSubmit = async (data: CustomerCreateFormData) => {
+    toast.loading("Creation du client en cours...", { id: "create" });
     try {
       // Upload logo to Firebase if provided
       const logoUrl = logo
@@ -80,6 +82,7 @@ export const CustomerCreateForm = ({ onClose }: Props) => {
       if (response.ok) {
         const result = await response.json();
         console.log("Success:", result);
+        toast.success("Client ajouter avec success");
         onClose();
         reset();
       } else {
@@ -89,6 +92,8 @@ export const CustomerCreateForm = ({ onClose }: Props) => {
       }
     } catch (error) {
       console.error("Error uploading files or submitting form:", error);
+    } finally {
+      toast.dismiss("create");
     }
   };
 

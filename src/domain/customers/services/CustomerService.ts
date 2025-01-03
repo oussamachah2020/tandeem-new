@@ -1,7 +1,10 @@
 import {CustomerCreateDto, CustomerCreateFilesDto} from "@/domain/customers/dtos/CustomerCreateDto";
 import {hash} from 'bcrypt'
 import fileService from "@/common/services/FileService";
-import {md5Hash} from "@/common/utils/functions";
+import {
+  generateRandomLetterPassword,
+  md5Hash,
+} from "@/common/utils/functions";
 import mailService from "@/common/services/MailService";
 import prisma from "@/common/libs/prisma";
 import {CustomerUpdateDto, CustomerUpdateFilesDto} from "@/domain/customers/dtos/CustomerUpdateDto";
@@ -43,8 +46,7 @@ class CustomerService {
   addOne = async (
     customerDto: CustomerCreateDto
   ): Promise<keyof typeof staticValues.notification> => {
-    console.log(customerDto);
-    const rawPassword = md5Hash(customerDto.email);
+    const rawPassword = generateRandomLetterPassword();
     const password = await hash(rawPassword, 12);
     await prisma.customer.create({
       data: {

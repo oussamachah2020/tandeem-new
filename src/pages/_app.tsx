@@ -25,25 +25,24 @@ const App = ({ Component, pageProps }: AppProps) => {
   // const token = useAuthStore((state) => state.accessToken); // Get the token from Zustand store
 
   // useEffect(() => {
-  //   // Define routes that are allowed without a token
-  //   const publicRoutes = ["/login"]; // Add any other public routes here
+  //   const redirection = setInterval(() => {
+  //     if (token) {
+  //       if (token) {
+  //         if (router.pathname === "/login") {
+  //           router.replace("/dashboard");
+  //         } else if (
+  //           router.pathname !== "/dashboard" &&
+  //           router.pathname !== "/login"
+  //         ) {
+  //           router.replace(router.pathname);
+  //         }
+  //       } else {
+  //         router.replace("/login");
+  //       }
+  //     }
+  //   }, 200);
 
-  //   // Check if the token exists
-  //   if (token) {
-  //     // If the token exists and the user is on a public route, redirect to /dashboard
-  //     if (publicRoutes.includes(router.pathname)) {
-  //       router.replace("/dashboard");
-  //     }
-
-  //     if (router.pathname !== "/dashboard" && router.pathname !== "/login") {
-  //       router.replace(router.pathname);
-  //     }
-  //   } else {
-  //     // If the token does not exist and the user is not on a public route, redirect to /login
-  //     if (!publicRoutes.includes(router.pathname)) {
-  //       router.replace("/login");
-  //     }
-  //   }
+  //   return () => clearInterval(redirection);
   // }, [token, router.pathname]);
 
   return (

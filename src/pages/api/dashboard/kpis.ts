@@ -4,11 +4,11 @@ import { AuthenticatedRequest, authMiddleware } from "@/apiMiddleware";
 import { Role } from "@prisma/client";
 
 const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
-  if (req.method !== "POST") {
+  if (req.method !== "GET") {
     return res.status(405).json({ error: "Method Not Allowed" });
   }
 
-  const { customerId } = req.body;
+  const { clientId } = req.query;
 
   const user = req.user!;
   const kpis = {
@@ -23,6 +23,8 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
     awaitingOffers: -1,
     ideaBox: -1,
   };
+
+  const customerId = clientId as string;
 
   try {
     // TANDEEM level access

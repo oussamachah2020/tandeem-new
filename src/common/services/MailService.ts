@@ -15,35 +15,33 @@ constructor() {
         const user = process.env.NEXT_PUBLIC_SMTP_LOGIN;
         const pass = process.env.NEXT_PUBLIC_SMTP_PASSWORD;
 
-        console.log('Mail Service Config:', {
-            host,
-            port,
-            email,
-            user,
-            passExists: !!pass
+        console.log("Mail Service Config:", {
+          host,
+          port: Number(port),
+          email,
+          user,
+          passExists: !!pass,
         });
 
         if (!host || !port || !email || !user || !pass) {
-            const missing = [
-                !host && 'SMTP_HOST',
-                !port && 'SMTP_PORT',
-                !email && 'SMTP_EMAIL',
-                !user && 'SMTP_LOGIN',
-                !pass && 'SMTP_PASSWORD'
-            ].filter(Boolean);
+          const missing = [
+            !host && "SMTP_HOST",
+            !port && "SMTP_PORT",
+            !email && "SMTP_EMAIL",
+            !user && "SMTP_LOGIN",
+            !pass && "SMTP_PASSWORD",
+          ].filter(Boolean);
 
-            throw new Error(`Missing SMTP configuration: ${missing.join(', ')}`);
+          throw new Error(`Missing SMTP configuration: ${missing.join(", ")}`);
         }
 
         this.transporter = createTransport({
-            pool: true,
-            secure: true,
-            host,
-            port: Number(port),
-            auth: {
-                user,
-                pass
-            },
+          host,
+          port: Number(port),
+          auth: {
+            user,
+            pass,
+          },
         });
 
         this.sender = `tandeem Team <${email}>`;

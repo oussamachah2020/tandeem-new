@@ -84,7 +84,7 @@ const PartnerTable: FC<Props> = ({ partners, onUpdate, onClick }) => {
             <img
               src={partner.logo}
               alt="partner-logo"
-              className="w-24 h-24 rounded-md object-contain"
+              className="w-24 h-24  object-contain"
             />
             {partner.name}
           </DatatableValue>

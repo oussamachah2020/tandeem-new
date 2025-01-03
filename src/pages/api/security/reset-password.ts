@@ -1,30 +1,28 @@
-// import {handle} from "@/apiMiddleware";
-// import {NextApiRequest, NextApiResponse} from "next";
-// import authService from "@/common/services/AuthService";
-
-// interface Request {
-//     token: string,
-//     password: string
-// }
-
-// export default async (req: NextApiRequest, res: NextApiResponse) =>
-//     handle<Request>(req, res, async ({body: {token, password}}) => {
-//         return await authService.resetPassword(token, password);
-//     }, null, {redirectTo: '/login'})
-
-import { AuthenticatedRequest, authMiddleware } from "@/apiMiddleware";
+import { AuthenticatedRequest } from "@/apiMiddleware";
 import { NextApiResponse } from "next";
-import { redirect } from "next/navigation";
+import authService from "@/common/services/AuthService";
 
-async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
-  const user = req?.user;
-
-  if (!user) {
-    redirect("/login");
+export default async function handler(
+  req: AuthenticatedRequest,
+  res: NextApiResponse
+) {
+  if (req.method !== "PUT") {
+    return res.status(405).json({ message: "Method not allowed" });
   }
-
   const { token, password } = req.body;
-  return await authService.resetPassword(token, password);
-}
 
-export default authMiddleware(handler);
+  try {
+    const resetMessage = await authService.resetPassword(token, password);
+
+    if (resetMessage === "passwordUpdatedSuccessfully") {
+      return res.status(200).json({ message: "Password updated successfully" });
+    } else if (resetMessage === "resetTokenExpired") {
+      return res.status(400).json({ message: "Expired token" });
+    } else {
+      return res.status(400).json({ message: "Invalid token" });
+    }
+  } catch (error) {
+    console.error("Error resetting password:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}

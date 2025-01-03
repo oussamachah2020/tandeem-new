@@ -39,6 +39,8 @@ export default async function handler(
         existingAccount.password
       );
 
+      console.log(password, existingAccount.password);
+
       if (isPasswordMatching) {
         const accessToken = jwt.sign(
           {

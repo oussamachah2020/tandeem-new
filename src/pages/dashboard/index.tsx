@@ -51,17 +51,18 @@ const Dashboard = ({}: Props) => {
   useEffect(() => {
     const fetchKPIs = async () => {
       setLoading(true);
+      const customerId = authenticatedUser?.customerId;
+
       try {
-        const response = await fetch("/api/dashboard/kpis", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            customerId: authenticatedUser?.customer?.id,
-          }),
-        });
+        const response = await fetch(
+          `/api/dashboard/kpis?clientId=${customerId}`, // Pass customerId in the query
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
 
         const data = await response.json();
         setKpis(data.kpis);

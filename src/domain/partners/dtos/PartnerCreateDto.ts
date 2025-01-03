@@ -5,7 +5,7 @@ import PaymentMethod = $Enums.PaymentMethod;
 
 export interface PartnerCreateDto {
   name: string;
-  address: string;
+  addresses: string[];
   website: string;
   category: Category;
   contractFrom: string;

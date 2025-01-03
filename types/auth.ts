@@ -11,6 +11,7 @@ export type User = {
   name: string;
   email: string;
   role: Role;
+  customerId: string;
   customer: Customer | null;
   employee: Employee | null;
 };

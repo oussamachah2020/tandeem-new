@@ -218,7 +218,8 @@ model User {
   isActive            Boolean   @default(true)
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
-  resetToken            String?
+  resetToken           String?  @db.Uuid
+  resetTokenExpiresAt  DateTime?
   customerId String?   @db.Uuid
   customer   Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
   employee   Employee? @relation

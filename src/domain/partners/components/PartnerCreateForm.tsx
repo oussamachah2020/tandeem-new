@@ -10,6 +10,7 @@ import { v4 as uuidv4 } from "uuid"; // To generate unique file names
 import { storage } from "../../../../firebase";
 import { PartnerCreateDto } from "../dtos/PartnerCreateDto";
 import { PlusIcon } from "lucide-react";
+import { useState } from "react";
 
 type Props = {
   onClose: () => void;
@@ -17,6 +18,7 @@ type Props = {
 
 export const PartnerCreateForm = ({ onClose }: Props) => {
   const { label, category, paymentMethod } = useStaticValues();
+  const [addresses, setAddresses] = useState<string[]>([]);
 
   const {
     handleSubmit,
@@ -42,6 +44,15 @@ export const PartnerCreateForm = ({ onClose }: Props) => {
 
   const { accessToken } = useAuthStore();
 
+  const addAddressField = () => {
+    setAddresses([...addresses, ""]);
+  };
+
+  const handleAddressChange = (index: number, value: string) => {
+    const newAddresses = [...addresses];
+    newAddresses[index] = value;
+    setAddresses(newAddresses);
+  };
   const uploadFile = async (file: File, folder: string): Promise<string> => {
     if (!file) {
       throw new Error("No file provided");
@@ -83,7 +94,7 @@ export const PartnerCreateForm = ({ onClose }: Props) => {
     try {
       const partnerData: PartnerCreateDto = {
         name: data.name,
-        address: data.address,
+        addresses,
         website: data.website,
         category: data.category,
         accepts: data.accepts,
@@ -151,19 +162,29 @@ export const PartnerCreateForm = ({ onClose }: Props) => {
                 />
               )}
             />
-            <Controller
-              name="address"
-              control={control}
-              rules={{ required: "Address is required" }}
-              render={({ field }) => (
-                <Input
-                  {...field}
-                  icon="MapPinIcon"
-                  label={label.address}
-                  placeholder={label.address}
-                />
-              )}
-            />
+            <div>
+              <div className="grid grid-cols-2 items-center gap-3">
+                {addresses.map((address, index) => (
+                  <Input
+                    key={index}
+                    icon="MapPinIcon"
+                    label={`${label.address} ${index + 1}`}
+                    placeholder={label.address}
+                    initialValue={address}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      handleAddressChange(index, e.target.value)
+                    }
+                  />
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={addAddressField}
+                className="w-full mt-7 rounded-md h-10 bg-blue-500 text-white text-sm flex flex-row justify-center items-center gap-3"
+              >
+                Ajouter une Address <PlusIcon className="h-4 w-4" />
+              </button>
+            </div>
             <Controller
               name="website"
               control={control}

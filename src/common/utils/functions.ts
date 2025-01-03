@@ -17,6 +17,26 @@ export const formatUrl = (url: string) => url
     .replace('http://', '')
     .replace('www.', '');
 
+export function generateRandomLetterPassword(
+  length: number = 8,
+  useUppercase: boolean = true
+): string {
+  // Define character sets
+  const lowercaseLetters = "abcdefghijklmnopqrstuvwxyz";
+  const uppercaseLetters = useUppercase ? "ABCDEFGHIJKLMNOPQRSTUVWXYZ" : "";
+
+  // Combine character sets
+  const allChars = lowercaseLetters + uppercaseLetters;
+
+  // Generate the password
+  let password = "";
+  for (let i = 0; i < length; i++) {
+    password += allChars[Math.floor(Math.random() * allChars.length)];
+  }
+
+  return password;
+}
+
 export const getDownloadUrl = (ref?: string | null) => ref ? `/api/files/${ref}` : ''
 
 export const md5Hash = (from: string) => crypto.createHash('md5').update(from).digest('hex');
