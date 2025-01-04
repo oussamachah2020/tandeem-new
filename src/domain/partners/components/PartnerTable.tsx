@@ -89,7 +89,7 @@ const PartnerTable: FC<Props> = ({ partners, onUpdate, onClick }) => {
             {partner.name}
           </DatatableValue>
           <DatatableValue className="truncate w-[180px]">
-            {partner.address.substring(0, 12)}...{" "}
+            {partner.address[0].substring(0, 12)}...{" "}
           </DatatableValue>
           <DatatableValue>
             <Label>{category[partner.category]}</Label>

@@ -57,7 +57,7 @@ class PartnerService {
     await prisma.partner.update({
       data: {
         name: editPartnerDto.name,
-        address: editPartnerDto.address,
+        address: editPartnerDto.addresses,
         website: editPartnerDto.website,
         category: editPartnerDto.category,
         accepts: editPartnerDto.accepts,

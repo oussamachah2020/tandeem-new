@@ -86,7 +86,7 @@ export const PartnerUpdateForm: FC<Props> = ({ partner, onClose }) => {
                 name="address"
                 label={label.address}
                 placeholder={label.address}
-                initialValue={partner.address}
+                initialValue={partner.address[0]}
               />
               <Input
                 icon="GlobeAltIcon"
