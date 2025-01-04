@@ -84,7 +84,7 @@ const Dashboard = ({}: Props) => {
         </div>
       ) : (
         <div className="flex flex-col gap-4">
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {kpis?.admins > -1 && (
               <div className="flex flex-col justify-center gap-3 px-6 py-4 rounded-lg bg-white border border-gray-200">
                 <div className="flex justify-between items-center">
