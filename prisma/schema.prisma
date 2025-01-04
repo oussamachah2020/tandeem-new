@@ -161,7 +161,7 @@ model AcceptedOffer {
 model Partner {
   id        String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name      String
-  address   String
+  address   String[]
   website   String
   logo      String
   category  Category      @default(NA)

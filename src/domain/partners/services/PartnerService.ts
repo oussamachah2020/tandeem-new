@@ -28,7 +28,7 @@ class PartnerService {
     await prisma.partner.create({
       data: {
         name: partnerDto.name,
-        address: partnerDto.address,
+        address: partnerDto.addresses,
         category: partnerDto.category,
         website: partnerDto.website,
         logo: partnerDto.logoUrl,

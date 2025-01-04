@@ -3,7 +3,7 @@ import {Blob} from "buffer";
 
 export interface CustomerCreateDto {
   name: string;
-  address: string;
+  address: string[];
   email: string;
   website: string;
   userId: string;
