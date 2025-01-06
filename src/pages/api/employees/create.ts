@@ -16,12 +16,20 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
   try {
     const employeeDto: EmployeeCreateDto = req.body;
 
-    const employee = await employeeService.addOne(employeeDto);
+    const message = await employeeService.addOne(employeeDto);
 
-    return res.status(201).json({
-      message: "Employee created successfully",
-      employee,
-    });
+    if (message === "unexpectedError") {
+      return res
+        .status(404)
+        .json({ message: "No customer with this id exist" });
+    } else if (message === "maxEmployeesExceeded") {
+      return res.status(400).json({ message: "Max employees Exceeded" });
+    } else {
+      return res.status(201).json({
+        message: "Employee created successfully",
+      });
+    }
+
   } catch (error: any) {
     if (error instanceof Error) {
       return res.status(500).json({

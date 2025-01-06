@@ -218,7 +218,7 @@ export const EmployeeCreateForm = ({ departments, customerId }: Props) => {
         {success && <p className="text-green-500">{success}</p>}
         <button
           type="submit"
-          className="bg-blue-500 text-white px-4 py-2 rounded mt-3"
+          className="bg-secondary w-full h-12 text-white px-4 py-2 rounded mt-3"
           disabled={loading}
         >
           {loading ? "Enregistrement..." : "Créer Employé"}
