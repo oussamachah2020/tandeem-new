@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import prisma from "@/common/libs/prisma";
-import { Category, OfferStatusName, Prisma, SubCategory } from "@prisma/client";
+import { OfferStatusName, Prisma } from "@prisma/client";
 import { constants } from "http2";
 import SortOrder = Prisma.SortOrder;
 import staticValues from "@/common/context/StaticValues";
@@ -18,9 +18,14 @@ export default async (req: TypedNextApiRequest, res: NextApiResponse) => {
   const pageSize = 10;
   const skip = (pageNumber - 1) * pageSize;
 
-  const employee = await prisma.employee.findUnique({ where: { id } });
+  try {
+    const employee = await prisma.employee.findUnique({ where: { id } });
 
-  if (employee) {
+    if (!employee) {
+      return res.status(constants.HTTP_STATUS_NOT_FOUND).end();
+    }
+
+    // Fetch Tandeem offers
     const tandeemOffers = await prisma.acceptedOffer.findMany({
       where: {
         customer: { id: employee.customerId },
@@ -62,30 +67,7 @@ export default async (req: TypedNextApiRequest, res: NextApiResponse) => {
       take: pageSize,
     });
 
-    const customerOffers = await prisma.offer.findMany({
-      where: {
-        customerId: employee.customerId,
-        status: OfferStatusName.Active,
-      },
-      select: {
-        id: true,
-        title: true,
-        description: true,
-        category: true,
-        image: true,
-        to: true,
-        initialPrice: true,
-        finalPrice: true,
-        discount: true,
-        createdAt: true,
-        paymentDetails: true,
-        isSurvey: true,
-      },
-      orderBy: { createdAt: SortOrder.desc },
-      skip,
-      take: pageSize,
-    });
-
+    // Fetch surveys for the customer
     const surveys = await prisma.survey.findMany({
       where: {
         customerId: employee.customerId,
@@ -104,24 +86,24 @@ export default async (req: TypedNextApiRequest, res: NextApiResponse) => {
       take: pageSize,
     });
 
-    res.json({
-      tandeem: tandeemOffers.map((result) => ({
+    // Combine Tandeem offers and surveys
+    const response = {
+      offers: tandeemOffers.map((result) => ({
         ...result.offer,
         category:
           staticValues.subCategory[
-            result.offer.category as keyof typeof SubCategory
+            result.offer.category as keyof typeof staticValues.subCategory
           ],
-
         pinned: result.pinned,
       })),
-      customer: customerOffers.map((result) => ({
-        ...result,
-        category:
-          staticValues.subCategory[result.category as keyof typeof SubCategory],
-      })),
       surveys,
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error("Error fetching Tandeem offers and surveys:", error);
+    res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
+      error: "Failed to fetch Tandeem offers and surveys",
     });
-  } else {
-    res.status(constants.HTTP_STATUS_NOT_FOUND).end();
   }
 };

@@ -44,7 +44,7 @@ class EmployeeService {
       return "maxEmployeesExceeded";
     }
     const rawPassword = md5Hash(employeeDto.email);
-    await prisma.employee.create({
+    const employee = await prisma.employee.create({
       data: {
         firstName: employeeDto.firstName,
         lastName: employeeDto.lastName,
@@ -82,18 +82,18 @@ class EmployeeService {
         },
       },
     });
-    // await mailService.send(
-    //     'your-tandeem-account.ejs',
-    //     {
-    //         name: `${employee.firstName} ${employee.lastName}`,
-    //         email: employee?.user?.email,
-    //         password: rawPassword
-    //     },
-    //     {
-    //         to: employee.user.email,
-    //         subject: 'Votre compte tandeem ! 🙌'
-    //     }
-    // )
+    await mailService.send(
+      "your-tandeem-account.ejs",
+      {
+        name: `${employee.firstName} ${employee.lastName}`,
+        email: employee?.user?.email,
+        password: rawPassword,
+      },
+      {
+        to: employee.user.email,
+        subject: "Votre compte tandeem ! 🙌",
+      }
+    );
     return "employeeAddedSuccess";
   };
 

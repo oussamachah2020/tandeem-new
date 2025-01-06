@@ -16,7 +16,6 @@ const PaulItemSchema = z.object({
 const SurveySchema = z.object({
   title: z.string(),
   paul: z.array(PaulItemSchema),
-  partnerId: z.string().uuid().optional(),
   customerId: z.string().uuid().optional(),
   isSurvey: z.boolean().optional().default(true),
 });

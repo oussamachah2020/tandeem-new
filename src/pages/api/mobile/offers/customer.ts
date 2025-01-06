@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import prisma from "@/common/libs/prisma";
-import { Category, OfferStatusName, Prisma, SubCategory } from "@prisma/client";
+import { OfferStatusName, Prisma } from "@prisma/client";
 import { constants } from "http2";
 import SortOrder = Prisma.SortOrder;
 import staticValues from "@/common/context/StaticValues";
@@ -18,50 +18,14 @@ export default async (req: TypedNextApiRequest, res: NextApiResponse) => {
   const pageSize = 10;
   const skip = (pageNumber - 1) * pageSize;
 
-  const employee = await prisma.employee.findUnique({ where: { id } });
+  try {
+    const employee = await prisma.employee.findUnique({ where: { id } });
 
-  if (employee) {
-    const tandeemOffers = await prisma.acceptedOffer.findMany({
-      where: {
-        customer: { id: employee.customerId },
-        for: { has: employee.level },
-        offer: { status: OfferStatusName.Active },
-      },
-      select: {
-        offer: {
-          select: {
-            id: true,
-            title: true,
-            description: true,
-            category: true,
-            image: true,
-            initialPrice: true,
-            finalPrice: true,
-            discount: true,
-            to: true,
-            partner: {
-              select: {
-                id: true,
-                name: true,
-                address: true,
-                logo: true,
-                website: true,
-                category: true,
-              },
-            },
-            createdAt: true,
-          },
-        },
-        pinned: true,
-      },
-      orderBy: [
-        { pinned: SortOrder.desc },
-        { offer: { createdAt: SortOrder.desc } },
-      ],
-      skip,
-      take: pageSize,
-    });
+    if (!employee) {
+      return res.status(constants.HTTP_STATUS_NOT_FOUND).end();
+    }
 
+    // Fetch customer offers
     const customerOffers = await prisma.offer.findMany({
       where: {
         customerId: employee.customerId,
@@ -86,6 +50,7 @@ export default async (req: TypedNextApiRequest, res: NextApiResponse) => {
       take: pageSize,
     });
 
+    // Fetch surveys for the customer
     const surveys = await prisma.survey.findMany({
       where: {
         customerId: employee.customerId,
@@ -104,24 +69,23 @@ export default async (req: TypedNextApiRequest, res: NextApiResponse) => {
       take: pageSize,
     });
 
-    res.json({
-      tandeem: tandeemOffers.map((result) => ({
-        ...result.offer,
-        category:
-          staticValues.subCategory[
-            result.offer.category as keyof typeof SubCategory
-          ],
-
-        pinned: result.pinned,
-      })),
-      customer: customerOffers.map((result) => ({
+    // Combine customer offers and surveys
+    const response = {
+      offers: customerOffers.map((result) => ({
         ...result,
         category:
-          staticValues.subCategory[result.category as keyof typeof SubCategory],
+          staticValues.subCategory[
+            result.category as keyof typeof staticValues.subCategory
+          ],
       })),
       surveys,
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error("Error fetching customer offers and surveys:", error);
+    res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
+      error: "Failed to fetch customer offers and surveys",
     });
-  } else {
-    res.status(constants.HTTP_STATUS_NOT_FOUND).end();
   }
 };

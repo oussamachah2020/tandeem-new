@@ -56,14 +56,18 @@ const EmployeesPage: NextPage<Props> = ({ departments = [] }) => {
     if (!authenticatedUser) return;
 
     try {
-      const response = await fetch("/api/employees/read", {
-        headers: {
-          Authorization: `Bearer ${accessToken}`, // Ensure the token is used
-        },
-      });
+      const response = await fetch(
+        `/api/employees/read?customerId=${authenticatedUser.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
 
       if (response.ok) {
         const data = await response.json();
+        console.log(data);
         setEmployees(data.employees);
       } else {
         console.error("Failed to fetch employees");
@@ -118,7 +122,10 @@ const EmployeesPage: NextPage<Props> = ({ departments = [] }) => {
         isShown={isAddEmployeeModalShown}
         onClose={() => setIsAddEmployeeModalShown(false)}
       >
-        <EmployeeCreateForm departments={departments} />
+        <EmployeeCreateForm
+          customerId={authenticatedUser?.id ?? ""}
+          departments={departments}
+        />
       </Modal>
       <Modal
         title="Modifier le salarié"

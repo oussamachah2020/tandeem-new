@@ -1,14 +1,20 @@
-import { FC, useState } from "react";
+import { useState } from "react";
 import { Input } from "@/common/components/atomic/Input";
-import { Department } from "@prisma/client";
+import { Department, JobLevel } from "@prisma/client";
 import { EitherInput } from "@/common/components/atomic/EitherInput";
 import { useStaticValues } from "@/common/context/StaticValuesContext";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { storage } from "../../../../firebase";
+import { useAuthStore } from "@/zustand/auth-store";
+import toast from "react-hot-toast";
+import { EmployeeCreateDto } from "../dtos/EmployeeCreateDto";
 
 interface Props {
   departments: Department[];
+  customerId: string; // Pass customerId as a prop or fetch it from context
 }
 
-export const EmployeeCreateForm: FC<Props> = ({ departments }) => {
+export const EmployeeCreateForm = ({ departments, customerId }: Props) => {
   const { jobLevel } = useStaticValues();
 
   // State for form data and response
@@ -27,6 +33,7 @@ export const EmployeeCreateForm: FC<Props> = ({ departments }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const { accessToken } = useAuthStore();
 
   // Handle input change
   const handleChange = (
@@ -47,23 +54,49 @@ export const EmployeeCreateForm: FC<Props> = ({ departments }) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    setSuccess(null);
+    toast.loading("Un moment...", { id: "create" });
 
     try {
-      const form = new FormData();
-      Object.entries(formData).forEach(([key, value]) => {
-        if (value) form.append(key, value as string | Blob);
-      });
+      let photoUrl = "";
 
+      // Upload photo to Firebase Storage if it exists
+      if (formData.photo) {
+        const storageRef = ref(
+          storage,
+          `employee-photos/${formData.photo.name}`
+        );
+        await uploadBytes(storageRef, formData.photo);
+        photoUrl = await getDownloadURL(storageRef);
+      }
+
+      // Prepare the payload according to EmployeeCreateDto
+      const payload: EmployeeCreateDto = {
+        customerId, // Include customerId from props or context
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        registration: formData.registration,
+        email: formData.email,
+        phone: formData.phone,
+        departmentId: formData.departmentId || undefined, // Only include if departmentName is empty
+        departmentName: formData.departmentName || undefined, // Only include if departmentId is empty
+        level: formData.level as JobLevel, // Cast to JobLevel type
+        photoUrl, // Include the photo URL from Firebase Storage
+        fcmToken: "",
+      };
+
+      // Submit the payload to the API
       const response = await fetch("/api/employees/create", {
         method: "POST",
-        body: form,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(payload),
       });
 
       const result = await response.json();
-      if (!response.ok) throw new Error(result.message || "An error occurred");
+      if (!response.ok) toast.error("An error occurred");
 
-      setSuccess("Employee created successfully!");
       setFormData({
         firstName: "",
         lastName: "",
@@ -75,10 +108,12 @@ export const EmployeeCreateForm: FC<Props> = ({ departments }) => {
         departmentId: departments.length > 0 ? departments[0].id : "",
         departmentName: "",
       });
+      toast.success("Employé ajouté avec succès !");
     } catch (err: any) {
       setError(err.message);
     } finally {
       setLoading(false);
+      toast.dismiss("create");
     }
   };
 

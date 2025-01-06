@@ -13,11 +13,13 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
     return res.status(401).json({ message: "Not Authorized" });
   }
 
-  console.log(user);
+  const { customerId } = req.query;
 
   try {
-    const employees = await employeeService.getAll(user?.customer.id);
-    const departments = await employeeService.getDepartments(user?.customer.id);
+    const employees = await employeeService.getAll(customerId as string);
+    const departments = await employeeService.getDepartments(
+      customerId as string
+    );
 
     return res.status(200).json({ employees, departments });
   } catch (error) {
