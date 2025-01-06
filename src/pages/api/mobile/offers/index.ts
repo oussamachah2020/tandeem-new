@@ -98,7 +98,6 @@ export default async (req: TypedNextApiRequest, res: NextApiResponse) => {
         paul: true,
         isSurvey: true,
         customer: true,
-        partner: true,
       },
       orderBy: { createdAt: SortOrder.desc },
       skip,
@@ -112,13 +111,13 @@ export default async (req: TypedNextApiRequest, res: NextApiResponse) => {
           staticValues.subCategory[
             result.offer.category as keyof typeof SubCategory
           ],
-        partner: {
-          ...result.offer.partner,
-          category:
-            staticValues.category[
-              result.offer.partner?.category as keyof typeof Category
-            ],
-        },
+        // partner: {
+        //   ...result.offer.partner,
+        //   category:
+        //     staticValues.category[
+        //       result.offer.partner?.category as keyof typeof Category
+        //     ],
+        // },
         pinned: result.pinned,
       })),
       customer: customerOffers.map((result) => ({

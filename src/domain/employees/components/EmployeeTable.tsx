@@ -19,41 +19,52 @@ interface Props {
 const EmployeeTable: FC<Props> = ({employees, onUpdate, onClick}) => {
     const {confirmation} = useStaticValues()
     return (
-        <Datatable
-            isEmpty={employees.length === 0}
-            headers={['Photo', 'Prenom', 'Nom', 'Departement', 'Poste', 'Immatricule']}
-        >
-            {employees.map((employee) => (
-                <DatatableRow
-                    key={employee.id}
-                    onClick={() => onClick(employee)}
-                    onUpdate={() => onUpdate(employee)}
-                    onDelete={{
-                        action: '/api/employees/delete',
-                        resourceId: employee.id,
-                        message: confirmation.areYouSure
-                    }}
-                    actionButtons={
-                        <ConfirmableActionButton
-                            action='/api/employees/reset-password'
-                            resourceId={employee.id}
-                            template={{icon: 'ArrowPathIcon', text: 'Reinitialiser'}}
-                            message="Le mot de passe sera réinitialisé et un email sera envoyé à l'adresse du salarié concerné."
-                            tooltip='Réinitialisé le mot de passe du compte de ce salarié'
-                        />
-                    }
-                >
-                    <DatatableValue>
-                        <ImagePreview imageRef={employee.photo}/>
-                    </DatatableValue>
-                    <DatatableValue>{employee.firstName}</DatatableValue>
-                    <DatatableValue>{employee.lastName}</DatatableValue>
-                    <DatatableValue><Label>{employee.department.title}</Label></DatatableValue>
-                    <DatatableValue><Label>{jobLevels[employee.level]}</Label></DatatableValue>
-                    <DatatableValue>{employee.registration}</DatatableValue>
-                </DatatableRow>
-            ))}
-        </Datatable>
+      <Datatable
+        isEmpty={employees.length === 0}
+        headers={[
+          "Photo",
+          "Prenom",
+          "Nom",
+          "Departement",
+          "Poste",
+          "Immatricule",
+        ]}
+      >
+        {employees.map((employee) => (
+          <DatatableRow
+            key={employee.id}
+            onClick={() => onClick(employee)}
+            onUpdate={() => onUpdate(employee)}
+            onDelete={{
+              action: "/api/employees/delete",
+              resourceId: employee.id,
+              message: confirmation.areYouSure,
+            }}
+            actionButtons={
+              <ConfirmableActionButton
+                action="/api/employees/reset-password"
+                resourceId={employee.id}
+                template={{ icon: "ArrowPathIcon", text: "Reinitialiser" }}
+                message="Le mot de passe sera réinitialisé et un email sera envoyé à l'adresse du salarié concerné."
+                tooltip="Réinitialisé le mot de passe du compte de ce salarié"
+              />
+            }
+          >
+            <DatatableValue>
+              <ImagePreview imageRef={employee.photo} />
+            </DatatableValue>
+            <DatatableValue>{employee.firstName}</DatatableValue>
+            <DatatableValue>{employee.lastName}</DatatableValue>
+            <DatatableValue>
+              <Label>{employee.department.title}</Label>
+            </DatatableValue>
+            <DatatableValue>
+              <Label>{jobLevels[employee.level]}</Label>
+            </DatatableValue>
+            <DatatableValue>{employee.registration}</DatatableValue>
+          </DatatableRow>
+        ))}
+      </Datatable>
     );
 }
 

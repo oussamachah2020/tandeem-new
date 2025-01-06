@@ -1,18 +1,18 @@
+import { AuthenticatedRequest, authMiddleware } from "@/apiMiddleware";
 import { PrismaClient } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
 
 const prisma = new PrismaClient();
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
   if (req.method === "POST") {
-    const { amount, currency, userId, offerId } = req.body;
+    const { amount, currency, offerId } = req.body;
 
-    if (!amount || !currency || !userId) {
+    if (!amount || !currency) {
       return res.status(400).json({ error: "Missing required fields" });
     }
+
+    const user = req.user;
 
     try {
       // Create a new payment record in the database
@@ -24,7 +24,7 @@ export default async function handler(
           paymentDetails: {
             amount,
             currency,
-            userId,
+            userId: user?.id ?? "",
             status: "pending",
           },
         },
@@ -41,7 +41,7 @@ export default async function handler(
           },
           body: JSON.stringify({
             amount,
-            currency,
+            currency: "MAD",
             order_id: payment.id,
             // redirect_url: `${process.env.NEXT_PUBLIC_BASE_URL}/payment/success`,
             // cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/payment/cancel`,
@@ -68,3 +68,5 @@ export default async function handler(
     res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 }
+
+export default authMiddleware(handler);

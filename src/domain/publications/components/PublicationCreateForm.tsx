@@ -44,6 +44,8 @@ const PublicationCreateForm = ({ onClose }: { onClose: () => void }) => {
     setLoading(true);
     setError(null);
 
+    toast.loading("Un moment...", { id: "create" });
+
     const formData = new FormData(event.currentTarget);
     const data = Object.fromEntries(formData.entries());
 
@@ -90,16 +92,16 @@ const PublicationCreateForm = ({ onClose }: { onClose: () => void }) => {
         body: JSON.stringify(publicationData),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to create publication.");
+      if (response.ok) {
+        const result = await response.json();
+        onClose();
+        toast.success("Publication ajoute aves success");
       }
 
-      const result = await response.json();
-      onClose();
-      toast.success("Publication created successfully!");
     } catch (err: any) {
       setError(err.message || "An unknown error occurred.");
     } finally {
+      toast.dismiss("create");
       setLoading(false);
     }
   };

@@ -177,7 +177,6 @@ model Partner {
   offers Offer[] @relation
 
   @@map("partner")
-  Survey Survey[]
 }
 
 model Survey {
@@ -190,10 +189,8 @@ model Survey {
 
   employeeId String     @db.Uuid
   employee Employee @relation(fields: [employeeId], references: [id])
-customerId String?   @db.Uuid
+  customerId String?   @db.Uuid
   customer   Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  partnerId  String?   @db.Uuid
-  partner    Partner?  @relation(fields: [partnerId], references: [id], onDelete: Cascade)
 }
 
 model Representative {

@@ -1,7 +1,7 @@
-import {Main} from "@/common/components/global/Main";
-import { ChangeEvent, useEffect } from "react";
+import { Main } from "@/common/components/global/Main";
+import { ChangeEvent, useEffect, useState } from "react";
 import { SectionName } from "@/common/security/Sections";
-import { GetServerSideProps, GetServerSidePropsResult, NextPage } from "next";
+import { NextPage } from "next";
 import { Modal } from "@/common/components/global/Modal";
 import useSearch from "@/common/hooks/UseSearch";
 import ActionBar from "@/common/components/global/ActionBar";
@@ -11,10 +11,8 @@ import useFilter from "@/common/hooks/UseFilter";
 import { AuthenticatedUser } from "@/common/services/AuthService";
 import { EmployeeCreateForm } from "@/domain/employees/components/EmployeeCreateForm";
 import EmployeeTable from "@/domain/employees/components/EmployeeTable";
-import { getToken } from "next-auth/jwt";
 import useModal from "@/common/hooks/UseModal";
 import employeeService from "@/domain/employees/services/EmployeeService";
-
 import { labeledJobLevels } from "@/common/utils/statics";
 import { EmployeeUpdateForm } from "@/domain/employees/components/EmployeeUpdateForm";
 import EmployeeDetails from "@/domain/employees/components/EmployeeDetails";
@@ -23,57 +21,61 @@ import { useAuthStore } from "@/zustand/auth-store";
 
 interface Props {
   user: AuthenticatedUser;
-  employees: Awaited<ReturnType<typeof employeeService.getAll>>;
+  initialEmployees: Awaited<ReturnType<typeof employeeService.getAll>>;
   departments: Awaited<ReturnType<typeof employeeService.getDepartments>>;
 }
 
-const EmployeesPage: NextPage<Props> = ({
-  user,
-  employees = [],
-  departments = [],
-}) => {
+type initialEmployees = Awaited<ReturnType<typeof employeeService.getAll>>;
+
+const EmployeesPage: NextPage<Props> = ({ departments = [] }) => {
   const [, isAddEmployeeModalShown, setIsAddEmployeeModalShown] =
     useModal(false);
   const [
     employeeToUpdate,
     isEditEmployeeModalShown,
     setIsEditEmployeeModalShown,
-  ] = useModal<ArrayElement<typeof employees>>();
+  ] = useModal<ArrayElement<initialEmployees>>();
   const [employeeToShow, isEmployeeModalShown, setIsEmployeeModalShown] =
-    useModal<ArrayElement<typeof employees>>();
+    useModal<ArrayElement<initialEmployees>>();
+  const { authenticatedUser, accessToken } = useAuthStore();
+
+  const [employees, setEmployees] = useState([]);
 
   const [searchResultedEmployees, onSearchInputChange] = useSearch(employees, [
     "firstName",
     "lastName",
     "registration",
   ]);
+
   const [filteredEmployees, onFilterValueChange] = useFilter(
     searchResultedEmployees,
     ["department.id" as any, "level"]
   );
 
-  const { authenticatedUser, accessToken } = useAuthStore();
+  async function fetchEmployees() {
+    if (!authenticatedUser) return;
 
-  // async function fetchEmployees() {
-  //   try {
-  //     const response = await fetch("/api/employees/read", {
-  //       headers: {
-  //         Authorization: `Bearer ${accessToken}`,
-  //       },
-  //     });
+    try {
+      const response = await fetch("/api/employees/read", {
+        headers: {
+          Authorization: `Bearer ${accessToken}`, // Ensure the token is used
+        },
+      });
 
-  //     if (response.ok) {
-  //       const data = await response.json();
-  //       console.log(data);
-  //     }
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // }
+      if (response.ok) {
+        const data = await response.json();
+        setEmployees(data.employees);
+      } else {
+        console.error("Failed to fetch employees");
+      }
+    } catch (error) {
+      console.error("Error fetching employees:", error);
+    }
+  }
 
-  // useEffect(() => {
-  //   if (authenticatedUser) fetchEmployees();
-  // }, [authenticatedUser]);
+  useEffect(() => {
+    fetchEmployees();
+  }, [authenticatedUser]);
 
   return (
     <>
@@ -138,25 +140,5 @@ const EmployeesPage: NextPage<Props> = ({
     </>
   );
 };
-
-
-// export const getServerSideProps: GetServerSideProps = async (context) => {
-//     const user = (await getToken(context)) as unknown as AuthenticatedUser;
-
-//     const {id: customerId} = user.customer!
-
-//     const employees = await employeeService.getAll(customerId)
-//     const departments = await employeeService.getDepartments(customerId)
-
-//     const result: GetServerSidePropsResult<Props> = {
-//         props: {
-//             user: JSON.parse(JSON.stringify(user)),
-//             employees: JSON.parse(JSON.stringify(employees)),
-//             departments: JSON.parse(JSON.stringify(departments))
-//         }
-//     }
-
-//     return result
-// }
 
 export default EmployeesPage;

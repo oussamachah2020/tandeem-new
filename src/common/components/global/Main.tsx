@@ -68,16 +68,30 @@ export const Main = ({ user, section, children }: Props) => {
     }
   }, [isExpired, refreshToken]);
 
+  // Prevent body scrolling when sidebar is open on mobile
+  useEffect(() => {
+    if (isSidebarOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isSidebarOpen]);
+
   return (
     <>
-      <div className="flex h-screen overflow-hidden">
+      <div className="flex h-screen">
+        {/* Sidebar */}
         <aside
           className={`fixed top-0 left-0 z-40 h-screen transform transition-transform duration-300 ease-in-out bg-white border-r
     ${
       isSidebarOpen ? "translate-x-0" : "-translate-x-full"
     } lg:static lg:translate-x-0 lg:w-80 w-64`}
         >
-          <div className="h-full flex flex-col gap-16 px-3 py-12 overflow-y-auto">
+          <div className="h-full flex flex-col gap-16 px-3 py-12">
             <img
               className="mx-auto h-10"
               src={`/img/${isSidebarOpen ? "logo-blue-1" : "logo-blue"}.svg`}
@@ -126,7 +140,7 @@ export const Main = ({ user, section, children }: Props) => {
 
         {/* Main Content */}
         <main
-          className="w-full min-h-screen flex flex-col 
+          className="flex-1 flex flex-col 
   px-4 sm:px-6 md:px-10 lg:px-24 
   py-6 md:py-10 lg:py-14 
   overflow-hidden"
@@ -145,17 +159,15 @@ export const Main = ({ user, section, children }: Props) => {
           </div>
 
           <div
-            className="flex-1 overflow-y-auto 
-      scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-secondary/50
-      pr-2"
+            className="flex-1 overflow-hidden"
             style={{
-              maxHeight: "calc(100vh - 150px)",
-              scrollbarGutter: "stable",
+              height: "calc(100vh - 150px)",
             }}
           >
             {children}
           </div>
         </main>
+
         {/* Mobile Overlay */}
         {isSidebarOpen && (
           <div

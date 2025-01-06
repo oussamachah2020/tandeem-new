@@ -49,11 +49,9 @@ export default async function handler(
       });
 
       if (existingEmployee) {
-        const rawPassword = md5Hash(email);
-
         // Compare the bcrypt-hashed password
         const isPasswordMatching = await bcrypt.compare(
-          rawPassword,
+          email,
           existingEmployee.user.password
         );
 
@@ -68,7 +66,7 @@ export default async function handler(
     }
 
     const { accessToken, refreshToken } = generateTokens({
-      id: existingEmployee.id,
+      id: existingEmployee.userId,
       phoneNumber: existingEmployee.phone,
       role: existingEmployee.role,
       customerId: existingEmployee.customerId,

@@ -39,15 +39,13 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
       });
     }
 
-    const { title, paul, partnerId, customerId, isSurvey } =
-      validationResult.data;
+    const { title, paul, customerId, isSurvey } = validationResult.data;
 
     // Create new survey
     const survey = await prisma.survey.create({
       data: {
         title,
         paul,
-        partnerId,
         isSurvey,
         customerId,
         employeeId: user?.id ?? "",
