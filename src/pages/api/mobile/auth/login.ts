@@ -33,7 +33,7 @@ export default async function handler(
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { phoneNumber, email }: LoginBody = req.body;
+  const { phoneNumber, email, password }: LoginBody = req.body;
 
   try {
     let existingEmployee;
@@ -42,7 +42,7 @@ export default async function handler(
       existingEmployee = await prisma.employee.findFirst({
         where: { phone: phoneNumber },
       });
-    } else if (email) {
+    } else if (email && password) {
       existingEmployee = await prisma.employee.findFirst({
         where: { user: { email } },
         include: { user: true },

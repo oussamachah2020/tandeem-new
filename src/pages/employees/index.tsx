@@ -18,16 +18,12 @@ import { EmployeeUpdateForm } from "@/domain/employees/components/EmployeeUpdate
 import EmployeeDetails from "@/domain/employees/components/EmployeeDetails";
 import { ArrayElement } from "@/common/utils/types";
 import { useAuthStore } from "@/zustand/auth-store";
-
-interface Props {
-  user: AuthenticatedUser;
-  initialEmployees: Awaited<ReturnType<typeof employeeService.getAll>>;
-  departments: Awaited<ReturnType<typeof employeeService.getDepartments>>;
-}
+import { RefreshCcw } from "lucide-react";
 
 type initialEmployees = Awaited<ReturnType<typeof employeeService.getAll>>;
+type Department = Awaited<ReturnType<typeof employeeService.getDepartments>>;
 
-const EmployeesPage: NextPage<Props> = ({ departments = [] }) => {
+const EmployeesPage = () => {
   const [, isAddEmployeeModalShown, setIsAddEmployeeModalShown] =
     useModal(false);
   const [
@@ -40,6 +36,7 @@ const EmployeesPage: NextPage<Props> = ({ departments = [] }) => {
   const { authenticatedUser, accessToken } = useAuthStore();
 
   const [employees, setEmployees] = useState([]);
+  const [departments, setDepartments] = useState([]);
 
   const [searchResultedEmployees, onSearchInputChange] = useSearch(employees, [
     "firstName",
@@ -52,12 +49,16 @@ const EmployeesPage: NextPage<Props> = ({ departments = [] }) => {
     ["department.id" as any, "level"]
   );
 
+  const [loading, setLoading] = useState(false);
+
   async function fetchEmployees() {
     if (!authenticatedUser) return;
 
+    setLoading(true);
+
     try {
       const response = await fetch(
-        `/api/employees/read?customerId=${authenticatedUser.id}`,
+        `/api/employees/read?customerId=${authenticatedUser.customerId}`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -67,13 +68,15 @@ const EmployeesPage: NextPage<Props> = ({ departments = [] }) => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log(data);
         setEmployees(data.employees);
+        setDepartments(data.departments);
       } else {
         console.error("Failed to fetch employees");
       }
     } catch (error) {
       console.error("Error fetching employees:", error);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -109,13 +112,19 @@ const EmployeesPage: NextPage<Props> = ({ departments = [] }) => {
             }
           />
         </FilterGroup>
-        <EmployeeTable
-          employees={filteredEmployees}
-          onClick={(employee: any) => setIsEmployeeModalShown(true, employee)}
-          onUpdate={(employee: any) =>
-            setIsEditEmployeeModalShown(true, employee)
-          }
-        />
+        {loading ? (
+          <div className="h-40 flex justify-center items-center w-full bg-white">
+            <RefreshCcw className="h-10 w-10 animate-spin text-primary" />
+          </div>
+        ) : (
+          <EmployeeTable
+            employees={filteredEmployees}
+            onClick={(employee: any) => setIsEmployeeModalShown(true, employee)}
+            onUpdate={(employee: any) =>
+              setIsEditEmployeeModalShown(true, employee)
+            }
+          />
+        )}
       </Main>
       <Modal
         title="Ajouter un salarié"
@@ -125,6 +134,7 @@ const EmployeesPage: NextPage<Props> = ({ departments = [] }) => {
         <EmployeeCreateForm
           customerId={authenticatedUser?.id ?? ""}
           departments={departments}
+          onClose={() => setIsAddEmployeeModalShown(false)}
         />
       </Modal>
       <Modal
@@ -135,6 +145,7 @@ const EmployeesPage: NextPage<Props> = ({ departments = [] }) => {
         <EmployeeUpdateForm
           employee={employeeToUpdate}
           departments={departments}
+          onClose={() => setIsEditEmployeeModalShown(false)}
         />
       </Modal>
       <Modal

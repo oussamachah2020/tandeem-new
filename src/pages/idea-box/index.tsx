@@ -8,72 +8,93 @@ import ideaBoxService from "@/domain/ideabox/services/IdeaBoxService";
 import IdeaBoxCard from "@/domain/ideabox/components/IdeaBoxCard";
 import FilterGroup from "@/common/components/filter/FilterGroup";
 import Filter from "@/common/components/filter/Filter";
-import {useMemo} from "react";
+import { useEffect, useMemo, useState } from "react";
 import useSearch from "@/common/hooks/UseSearch";
 import useFilter from "@/common/hooks/UseFilter";
-import {useStaticValues} from "@/common/context/StaticValuesContext";
+import { useStaticValues } from "@/common/context/StaticValuesContext";
 import EmptyContent from "@/common/components/atomic/EmptyContent";
 import { useAuthStore } from "@/zustand/auth-store";
+import { ArrayElement } from "@/common/utils/types";
 
-interface Props {
-    user: AuthenticatedUser
-    ideas: Awaited<ReturnType<typeof ideaBoxService.getAll>>
-}
+type Idea = ArrayElement<Awaited<ReturnType<typeof ideaBoxService.getAll>>>;
 
-const IdeaBox: NextPage<Props> = ({user, ideas}) => {
-    const {label} = useStaticValues()
-    const employees = useMemo<Record<string, string>>(() => {
-        return ideas
-            .reduce((acc, {employee}) => {
-                return ({...acc, [employee.id]: `${employee.firstName} ${employee.lastName}`});
-            }, {})
-    }, [ideas])
+const IdeaBox = () => {
+  const { label } = useStaticValues();
+  const [ideas, setIdeas] = useState<Idea[]>([]);
 
-    const [searchResultedIdeas, onSearchInputChange] = useSearch(ideas, ['title', 'employee.firstName' as any, 'employee.lastName' as any])
-    const [filteredIdeas, onFilterValueChange] = useFilter(searchResultedIdeas, ['employee.id' as any])
-    const { authenticatedUser } = useAuthStore();
-    return (
-      <>
-        <Main section={SectionName.IdeaBox} user={authenticatedUser}>
-          <ActionBar onSearchInputChange={onSearchInputChange} />
-          <FilterGroup>
-            <Filter
-              label={label.employee}
-              icon="UserIcon"
-              values={Object.entries(employees)}
-              onValueChange={(e: any) =>
-                onFilterValueChange("employee.id" as any, e)
-              }
-            />
-          </FilterGroup>
-          {filteredIdeas.length > 0 ? (
-            <div className="grid grid-cols-3 gap-4">
-              {filteredIdeas.map((idea, idx) => (
-                <IdeaBoxCard key={idx} idea={idea} />
-              ))}
-            </div>
-          ) : (
-            <EmptyContent />
-          )}
-        </Main>
-      </>
-    );
-}
+  const employees = useMemo<Record<string, string>>(() => {
+    return ideas.reduce((acc, { employee }) => {
+      return {
+        ...acc,
+        [employee.id]: `${employee.firstName} ${employee.lastName}`,
+      };
+    }, {});
+  }, [ideas]);
 
+  const [searchResultedIdeas, onSearchInputChange] = useSearch(ideas, [
+    "title",
+    "employee.firstName" as any,
+    "employee.lastName" as any,
+  ]);
+  const [filteredIdeas, onFilterValueChange] = useFilter(searchResultedIdeas, [
+    "employee.id" as any,
+  ]);
+  const { authenticatedUser, accessToken } = useAuthStore();
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-    const user = (await getToken(context)) as unknown as AuthenticatedUser
+  async function fetchIdeas() {
+    if (authenticatedUser) {
+      try {
+        const response = await fetch(
+          `/api/ideabox?id=${authenticatedUser.customerId}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
 
-    const ideas = await ideaBoxService.getAll(user.customer?.id!)
-
-    const result: GetServerSidePropsResult<Props> = {
-        props: {
-            user: JSON.parse(JSON.stringify(user)),
-            ideas: JSON.parse(JSON.stringify(ideas))
+        if (response.ok) {
+          const data = await response.json();
+          setIdeas(data);
         }
+      } catch (error) {
+        console.error(error);
+      }
     }
+  }
 
-    return result
-}
+  useEffect(() => {
+    fetchIdeas();
+  }, [authenticatedUser]);
+
+  return (
+    <>
+      <Main section={SectionName.IdeaBox} user={authenticatedUser}>
+        <ActionBar onSearchInputChange={onSearchInputChange} />
+        <FilterGroup>
+          <Filter
+            label={label.employee}
+            icon="UserIcon"
+            values={Object.entries(employees)}
+            onValueChange={(e: any) =>
+              onFilterValueChange("employee.id" as any, e)
+            }
+          />
+        </FilterGroup>
+        {filteredIdeas.length > 0 ? (
+          <div className="grid grid-cols-3 gap-4">
+            {filteredIdeas.map((idea, idx) => (
+              <IdeaBoxCard key={idx} idea={idea} />
+            ))}
+          </div>
+        ) : (
+          <EmptyContent />
+        )}
+      </Main>
+    </>
+  );
+};
+
 
 export default IdeaBox;

@@ -51,7 +51,11 @@ const EmployeeTable: FC<Props> = ({employees, onUpdate, onClick}) => {
             }
           >
             <DatatableValue>
-              <ImagePreview imageRef={employee.photo} />
+              <img
+                src={employee.photo}
+                alt="employee-photo"
+                className="h-20 w-20 object-cover rounded-md"
+              />
             </DatatableValue>
             <DatatableValue>{employee.firstName}</DatatableValue>
             <DatatableValue>{employee.lastName}</DatatableValue>

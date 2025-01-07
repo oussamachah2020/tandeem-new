@@ -21,19 +21,25 @@ import { useAuthStore } from "@/zustand/auth-store";
 
 interface Props {
   // partners: Awaited<ReturnType<typeof partnerService.getAll>>;
-  offers: Awaited<ReturnType<typeof offerService.getAllForLevel1>>;
+  // offers: Awaited<ReturnType<typeof offerService.getAllForLevel1>>;
 }
 
 type Partner = Awaited<ReturnType<typeof partnerService.getAll>>;
+type Offer = ArrayElement<
+  Awaited<ReturnType<typeof offerService.getAllForLevel1>>
+>;
 
-const Offers = ({ offers }: Props) => {
+const Offers = ({}: Props) => {
   const [, isAddOfferModalShown, toggleAddOfferModal] = useModal(false);
-  const [offerToShow, isOfferModalShown, toggleOfferModal] =
-    useModal<ArrayElement<typeof offers>>();
+  const [offerToShow, isOfferModalShown, toggleOfferModal] = useModal<Offer>();
   const [offerToUpdate, isOfferUpdateModalShown, toggleOfferUpdateModal] =
-    useModal<ArrayElement<typeof offers>>();
+    useModal<Offer>();
 
-  const [searchResultedOffers, onSearchInputChange] = useSearch([], ["title"]);
+  const [offers, setOffers] = useState<Offer[]>([]);
+
+  const [searchResultedOffers, onSearchInputChange] = useSearch(offers, [
+    "title",
+  ]);
   const [filteredOffers, onFilterValueChange] = useFilter(
     searchResultedOffers,
     ["partner.id" as any, "status"]
@@ -52,7 +58,7 @@ const Offers = ({ offers }: Props) => {
           Authorization: `Bearer ${accessToken}`,
         },
       });
-      if (!response.ok) throw new Error("Failed to fetch customers.");
+      if (!response.ok) console.error("Failed to fetch customers.");
       const data = await response.json();
       setPartners(data);
     } catch (err: any) {
@@ -62,14 +68,34 @@ const Offers = ({ offers }: Props) => {
     }
   };
 
+  const fetchOffers = async () => {
+    setLoading(true);
+
+    try {
+      const response = await fetch("/api/offers/consume", {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      if (!response.ok) console.error("Failed to fetch customers.");
+      const data = await response.json();
+      console.log(data);
+    } catch (err: any) {
+      console.error(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchPartners();
-  }, [authenticatedUser]);
+    fetchOffers();
+  }, []);
 
   useEffect(() => {
     if (authenticatedUser) {
       if (getRoleLevel(authenticatedUser?.role) === 2)
-        return router.replace("/media-library/customer");
+        return router.replace("/offers/customer");
     }
   }, [authenticatedUser]);
 
@@ -102,7 +128,7 @@ const Offers = ({ offers }: Props) => {
           />
         </FilterGroup>
         <OfferTable
-          offers={[]}
+          offers={filteredOffers}
           onClick={(offer: any) => toggleOfferModal(true, offer)}
           onUpdate={(offer: any) => toggleOfferUpdateModal(true, offer)}
         />

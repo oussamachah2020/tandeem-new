@@ -12,29 +12,41 @@ interface Props {
     employee?: ArrayElement<Awaited<ReturnType<typeof employeeService.getAll>>>
 }
 
-const EmployeeDetails: FC<Props> = ({employee}) =>
-    employee && (
-        <div className='flex flex-col gap-4'>
-            <div className='grid grid-cols-6 gap-8'>
-                <ImagePreview imageRef={employee.photo} aspectRatio='aspect-square' width='w-full'/>
-                <div className='col-span-5 flex flex-col gap-4'>
-                    <div className='grid grid-cols-2 gap-8'>
-                        <DetailsTable>
-                            <DetailsRow title='Nom complet'>{`${employee.firstName} ${employee.lastName}`}</DetailsRow>
-                            <DetailsRow title='Email'><Link
-                                href={`mailto:${employee.user.email}`}>{employee.user.email}</Link></DetailsRow>
-                            <DetailsRow title='Tel'>{employee.phone}</DetailsRow>
-                        </DetailsTable>
-                        <DetailsTable>
-                            <DetailsRow title='Immatricule'>{employee.registration}</DetailsRow>
-                            <DetailsRow title='Poste'><Label>{jobLevels[employee.level]}</Label></DetailsRow>
-                            <DetailsRow title='Departement'><Label>{employee.department.title}</Label></DetailsRow>
-                        </DetailsTable>
-                    </div>
-                </div>
-            </div>
+const EmployeeDetails: FC<Props> = ({ employee }) =>
+  employee && (
+    <div className="flex flex-col gap-4">
+      <div className="grid grid-cols-6 gap-8">
+        <img
+          src={employee.photo}
+          className="aspect-square rounded-md object-cover"
+          width="w-full"
+        />
+        <div className="col-span-5 flex flex-col gap-4">
+          <div className="grid grid-cols-2 gap-8">
+            <DetailsTable>
+              <DetailsRow title="Nom complet">{`${employee.firstName} ${employee.lastName}`}</DetailsRow>
+              <DetailsRow title="Email">
+                <Link href={`mailto:${employee.user.email}`}>
+                  {employee.user.email}
+                </Link>
+              </DetailsRow>
+              <DetailsRow title="Tel">{employee.phone}</DetailsRow>
+            </DetailsTable>
+            <DetailsTable>
+              <DetailsRow title="Immatricule">
+                {employee.registration}
+              </DetailsRow>
+              <DetailsRow title="Poste">
+                <Label>{jobLevels[employee.level]}</Label>
+              </DetailsRow>
+              <DetailsRow title="Departement">
+                <Label>{employee.department.title}</Label>
+              </DetailsRow>
+            </DetailsTable>
+          </div>
         </div>
-
-    )
+      </div>
+    </div>
+  );
 
 export default EmployeeDetails

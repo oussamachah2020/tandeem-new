@@ -100,29 +100,28 @@ class EmployeeService {
   updateOne = async (
     employeeDto: EmployeeUpdateDto & EmployeeUpdateFilesDto
   ): Promise<keyof typeof staticValues.notification> => {
-    if (employeeDto.photo)
-      await fileService.replace(employeeDto.imageRef, employeeDto.photo);
-    await prisma.employee.update({
-      data: {
-        firstName: employeeDto.firstName,
-        lastName: employeeDto.lastName,
-        phone: employeeDto.phone,
-        registration: employeeDto.registration,
-        level: employeeDto.level,
-        department: employeeDto.departmentId
-          ? { connect: { id: employeeDto.departmentId } }
-          : {
-              create: {
-                title: employeeDto.departmentName!,
-                customer: { connect: { id: employeeDto.customerId } },
+    if (employeeDto.photoUrl)
+      await prisma.employee.update({
+        data: {
+          firstName: employeeDto.firstName,
+          lastName: employeeDto.lastName,
+          phone: employeeDto.phone,
+          registration: employeeDto.registration,
+          level: employeeDto.level,
+          department: employeeDto.departmentId
+            ? { connect: { id: employeeDto.departmentId } }
+            : {
+                create: {
+                  title: employeeDto.departmentName!,
+                  customer: { connect: { id: employeeDto.customerId } },
+                },
               },
-            },
-      },
-      where: {
-        id: employeeDto.employeeId,
-        customerId: employeeDto.customerId,
-      },
-    });
+        },
+        where: {
+          id: employeeDto.employeeId,
+          customerId: employeeDto.customerId,
+        },
+      });
     return "employeeUpdatedSuccess";
   };
 

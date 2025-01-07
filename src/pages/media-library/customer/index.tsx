@@ -13,7 +13,7 @@ import MediaLibraryTable from "@/domain/media-library/components/MediaLibraryTab
 import MediaForm from "@/domain/media-library/components/MediaForm";
 import {getRoleLevel} from "@/common/utils/functions";
 import Tab from "@/common/components/global/Tab";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAuthStore } from "@/zustand/auth-store";
 
 interface Props {
@@ -21,17 +21,46 @@ interface Props {
   customerMediaLibrary: Awaited<ReturnType<typeof mediaLibraryService.getAll>>;
 }
 
-const MediaLibrary = ({ tandeemMediaLibrary, customerMediaLibrary }: Props) => {
+type Media = Awaited<ReturnType<typeof mediaLibraryService.getAll>>;
+
+const MediaLibrary = ({ customerMediaLibrary = [] }: Props) => {
+  const [mediaLibrary, setMediaLibrary] = useState<ArrayElement<Media>[]>([]);
+
   const [selectedTab, setSelectedTab] = useState(1);
   const [searchResultedTandeemMediaLibrary, onTandeemSearchInputChange] =
-    useSearch(tandeemMediaLibrary, ["title", "description"]);
+    useSearch(mediaLibrary, ["title", "description"]);
   const [searchResultedCustomerMediaLibrary, onCustomerSearchInputChange] =
-    useSearch(tandeemMediaLibrary, ["title", "description"]);
+    useSearch(customerMediaLibrary, ["title", "description"]);
   const [, isAddMediaModalShown, toggleAddMediaModal] = useModal(false);
   const [mediaToUpdate, isUpdateMediaModalShown, toggleUpdateMediaModal] =
-    useModal<ArrayElement<typeof tandeemMediaLibrary>>();
+    useModal<ArrayElement<Media>>();
+  const [loading, setLoading] = useState<boolean>(true);
 
-  const { authenticatedUser } = useAuthStore();
+  const { authenticatedUser, accessToken } = useAuthStore();
+
+  const fetchMedia = useCallback(async () => {
+    setLoading(true);
+
+    try {
+      const response = await fetch("/api/media-library/read", {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      if (!response.ok) console.error("Failed to fetch customers.");
+      const data = await response.json();
+      setMediaLibrary(data);
+      console.log({ media: data });
+    } catch (err: any) {
+      console.error(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchMedia();
+  }, []);
 
   return (
     <Main section={SectionName.MediaLibrary} user={authenticatedUser}>

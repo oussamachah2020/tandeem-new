@@ -98,8 +98,8 @@ const ConfirmableActionButton: FC<Props> = ({
               onClick={handleAction}
               className="w-36 bg-red-500 h-12 rounded-md text-white  flex flex-row justify-center items-center gap-2"
             >
-              <TrashIcon className="h-5 w-5 text-white" />
-              Supprimer
+              {/* <TrashIcon className="h-5 w-5 text-white" /> */}
+              Continuer
             </button>
           </div>
           {/* {resourceRefs?.map((ref, idx) => (

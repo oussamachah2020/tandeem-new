@@ -6,6 +6,8 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
   try {
     const user = req?.user;
 
+    console.log(user?.customer?.id);
+
     // Call service to get all media for the customer
     const media = await mediaLibraryService.getAll(user?.customer?.id);
 

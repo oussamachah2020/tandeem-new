@@ -11,10 +11,11 @@ import { EmployeeCreateDto } from "../dtos/EmployeeCreateDto";
 
 interface Props {
   departments: Department[];
-  customerId: string; // Pass customerId as a prop or fetch it from context
+  customerId: string;
+  onClose: () => void;
 }
 
-export const EmployeeCreateForm = ({ departments, customerId }: Props) => {
+export const EmployeeCreateForm = ({ departments, onClose }: Props) => {
   const { jobLevel } = useStaticValues();
 
   // State for form data and response
@@ -33,7 +34,7 @@ export const EmployeeCreateForm = ({ departments, customerId }: Props) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const { accessToken } = useAuthStore();
+  const { authenticatedUser, accessToken } = useAuthStore();
 
   // Handle input change
   const handleChange = (
@@ -71,7 +72,7 @@ export const EmployeeCreateForm = ({ departments, customerId }: Props) => {
 
       // Prepare the payload according to EmployeeCreateDto
       const payload: EmployeeCreateDto = {
-        customerId, // Include customerId from props or context
+        customerId: authenticatedUser?.customerId ?? "", // Include customerId from props or context
         firstName: formData.firstName,
         lastName: formData.lastName,
         registration: formData.registration,
@@ -108,6 +109,8 @@ export const EmployeeCreateForm = ({ departments, customerId }: Props) => {
         departmentId: departments.length > 0 ? departments[0].id : "",
         departmentName: "",
       });
+
+      onClose();
       toast.success("Employé ajouté avec succès !");
     } catch (err: any) {
       setError(err.message);

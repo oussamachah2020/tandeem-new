@@ -13,6 +13,7 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { OfferCreateDto } from "../../shared/dtos/OfferCreateDto";
 import { storage } from "../../../../../firebase";
 import { useAuthStore } from "@/zustand/auth-store";
+import toast from "react-hot-toast";
 
 interface Props {
   partners: Awaited<ReturnType<typeof partnerService.getAll>>;
@@ -26,6 +27,7 @@ export const OfferCreateForm = ({ partners }: Props) => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const { accessToken } = useAuthStore();
 
   const handlePartnerSelect = (e: ChangeEvent<HTMLSelectElement>) => {
     const partner = partners.find(
@@ -45,7 +47,8 @@ export const OfferCreateForm = ({ partners }: Props) => {
   const handleSubmit = async (formData: FormData) => {
     setIsSubmitting(true);
     setError(null);
-    setSuccess(null);
+
+    toast.loading("Un moment...", { id: "create" });
 
     try {
       // Upload image to Firebase Storage
@@ -73,18 +76,20 @@ export const OfferCreateForm = ({ partners }: Props) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify(offerData),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to create offer. Please try again.");
+        toast.error("Failed to create offer. Please try again.");
       }
 
-      setSuccess("Offer created successfully!");
+      toast.success("Offre créée avec succès !");
     } catch (error: any) {
       setError(error.message || "An unknown error occurred.");
     } finally {
+      toast.dismiss("create");
       setIsSubmitting(false);
     }
   };

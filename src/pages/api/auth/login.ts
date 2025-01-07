@@ -30,7 +30,7 @@ export default async function handler(
   try {
     const existingAccount = await prisma.user.findUnique({
       where: { email },
-      include: { customer: true },
+      include: { customer: { select: { id: true } } },
     });
 
     if (existingAccount) {
@@ -38,8 +38,6 @@ export default async function handler(
         password,
         existingAccount.password
       );
-
-      console.log(password, existingAccount.password);
 
       if (isPasswordMatching) {
         const accessToken = jwt.sign(
