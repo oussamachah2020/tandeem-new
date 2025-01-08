@@ -22,31 +22,31 @@ export default async function handler(
   try {
     const decoded = verify(refreshToken, TOKEN_SECRET) as JwtPayload;
 
-    const employee = await prisma.employee.findUnique({
+    const user = await prisma.user.findUnique({
       where: { id: decoded.id },
       select: {
         id: true,
         role: true,
         customerId: true,
-        phone: true,
-        user: {
+        email: true,
+        employee: {
           select: {
-            email: true,
+            phone: true,
           },
         },
       },
     });
 
-    if (!employee) {
+    if (!user) {
       return res.status(403).json({ error: "User not found" });
     }
 
     const newAccessToken = sign(
       {
-        id: employee.id,
-        phoneNumber: employee.phone,
-        role: employee.role,
-        customerId: employee.customerId,
+        id: user.id,
+        phoneNumber: user.employee?.phone,
+        role: user.role,
+        customerId: user.customerId,
       },
       TOKEN_SECRET,
       { expiresIn: "1h" }
