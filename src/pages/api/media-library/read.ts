@@ -6,13 +6,15 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
   try {
     const user = req?.user;
 
-    console.log(user?.customer?.id);
+    console.log(user);
 
     // Call service to get all media for the customer
-    const media = await mediaLibraryService.getAll(user?.customer?.id);
+    const tandeemMedia = await mediaLibraryService.getAll();
+    const customerMedia = await mediaLibraryService.getAll(user?.customer?.id);
+
 
     // Send the media data as a JSON response
-    return res.status(200).json(media);
+    return res.status(200).json({ tandeemMedia, customerMedia });
   } catch (error) {
     // Handle error and send error response
     console.error(error);

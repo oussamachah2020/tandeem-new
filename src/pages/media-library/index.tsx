@@ -1,8 +1,6 @@
 import {Main} from "@/common/components/global/Main";
-import {SectionName} from "@/common/security/Sections";
-import {GetServerSideProps, GetServerSidePropsResult, NextPage} from "next";
-import {AuthenticatedUser} from "@/common/services/AuthService";
-import {getToken} from "next-auth/jwt";
+import { SectionName } from "@/common/security/Sections";
+import { AuthenticatedUser } from "@/common/services/AuthService";
 import ActionBar from "@/common/components/global/ActionBar";
 import useSearch from "@/common/hooks/UseSearch";
 import useModal from "@/common/hooks/UseModal";

@@ -1,66 +1,69 @@
 import {Main} from "@/common/components/global/Main";
-import {SectionName} from "@/common/security/Sections";
-import {GetServerSideProps, GetServerSidePropsResult, NextPage} from "next";
-import {AuthenticatedUser} from "@/common/services/AuthService";
-import {getToken} from "next-auth/jwt";
-import ActionBar from "@/common/components/global/ActionBar";
-import useSearch from "@/common/hooks/UseSearch";
-import useModal from "@/common/hooks/UseModal";
-import {Modal} from "@/common/components/global/Modal";
-import {ArrayElement} from "@/common/utils/types";
+import { SectionName } from "@/common/security/Sections";
+import { ArrayElement } from "@/common/utils/types";
 import mediaLibraryService from "@/domain/media-library/services/MediaLibraryService";
 import MediaLibraryTable from "@/domain/media-library/components/MediaLibraryTable";
 import MediaForm from "@/domain/media-library/components/MediaForm";
-import {getRoleLevel} from "@/common/utils/functions";
 import Tab from "@/common/components/global/Tab";
 import { useCallback, useEffect, useState } from "react";
 import { useAuthStore } from "@/zustand/auth-store";
-
-interface Props {
-  tandeemMediaLibrary: Awaited<ReturnType<typeof mediaLibraryService.getAll>>;
-  customerMediaLibrary: Awaited<ReturnType<typeof mediaLibraryService.getAll>>;
-}
+import ActionBar from "@/common/components/global/ActionBar";
+import useSearch from "@/common/hooks/UseSearch";
+import useModal from "@/common/hooks/UseModal";
+import { Modal } from "@/common/components/global/Modal";
 
 type Media = Awaited<ReturnType<typeof mediaLibraryService.getAll>>;
+type CustomerMedia = Awaited<ReturnType<typeof mediaLibraryService.getAll>>;
 
-const MediaLibrary = ({ customerMediaLibrary = [] }: Props) => {
+const MediaLibrary = () => {
   const [mediaLibrary, setMediaLibrary] = useState<ArrayElement<Media>[]>([]);
+  const [customerMedia, setCustomerMedia] = useState<
+    ArrayElement<CustomerMedia>[]
+  >([]);
 
   const [selectedTab, setSelectedTab] = useState(1);
+
   const [searchResultedTandeemMediaLibrary, onTandeemSearchInputChange] =
     useSearch(mediaLibrary, ["title", "description"]);
+
   const [searchResultedCustomerMediaLibrary, onCustomerSearchInputChange] =
-    useSearch(customerMediaLibrary, ["title", "description"]);
+    useSearch(customerMedia, ["title", "description"]);
+
   const [, isAddMediaModalShown, toggleAddMediaModal] = useModal(false);
+
   const [mediaToUpdate, isUpdateMediaModalShown, toggleUpdateMediaModal] =
     useModal<ArrayElement<Media>>();
+
+  const { accessToken, authenticatedUser } = useAuthStore();
+
   const [loading, setLoading] = useState<boolean>(true);
 
-  const { authenticatedUser, accessToken } = useAuthStore();
+  const fetchMedia = async () => {
+    if (!accessToken) return;
 
-  const fetchMedia = useCallback(async () => {
     setLoading(true);
-
     try {
       const response = await fetch("/api/media-library/read", {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
       });
-      if (!response.ok) console.error("Failed to fetch customers.");
-      const data = await response.json();
-      setMediaLibrary(data);
-      console.log({ media: data });
+
+      if (response.ok) {
+        const data = await response.json();
+        setMediaLibrary(data.tandeemMedia);
+        setCustomerMedia(data.customerMedia);
+      }
     } catch (err: any) {
       console.error(err.message);
     } finally {
       setLoading(false);
     }
-  }, []);
+  };
 
   useEffect(() => {
     fetchMedia();
-  }, []);
+  }, [accessToken]);
 
   return (
     <Main section={SectionName.MediaLibrary} user={authenticatedUser}>
@@ -120,7 +123,5 @@ const MediaLibrary = ({ customerMediaLibrary = [] }: Props) => {
     </Main>
   );
 };
-
-
 
 export default MediaLibrary;

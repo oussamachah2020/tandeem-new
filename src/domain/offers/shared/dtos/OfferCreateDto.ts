@@ -14,7 +14,7 @@ export interface OfferCreateDto {
   finalPrice?: string;
   paymentDetails: string;
   imageUrl: string;
-  couponUrl: string;
+  coupon: string;
 }
 
 export interface OfferCreateFilesDto {

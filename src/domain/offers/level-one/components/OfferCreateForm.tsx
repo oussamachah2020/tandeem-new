@@ -68,7 +68,7 @@ export const OfferCreateForm = ({ partners }: Props) => {
         finalPrice: formData.get("finalPrice") as string,
         paymentDetails: formData.get("paymentDetails") as string,
         imageUrl: imageUrl || "",
-        couponUrl: formData.get("couponUrl") as string,
+        coupon: formData.get("couponUrl") as string,
       };
 
       // Send the data to the API endpoint

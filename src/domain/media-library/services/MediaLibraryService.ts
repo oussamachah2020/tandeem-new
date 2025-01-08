@@ -26,18 +26,20 @@ class MediaLibraryService {
 
     async updateOne(mediaUpdateDto: MediaDto & { id: string, customerId?: string }) {
         const {id, title, description, customerId, url} = mediaUpdateDto
-        const media = await prisma
-            .mediaLibrary
-            .findUnique({
-                where: {id},
-                select: {customerId: true}
-            })
+
+        
+        const media = await prisma.mediaLibrary.findUnique({
+          where: { id },
+          select: { customerId: true },
+        });
+
         if (media && (media.customerId == customerId)) {
-            await prisma
-                .mediaLibrary
-                .update({where: {id}, data: {title, description, url}})
+          await prisma.mediaLibrary.update({
+            where: { id },
+            data: { title, description, url },
+          });
+          return "mediaUpdatedSuccess";
         }
-        return 'mediaUpdatedSuccess'
     }
 
 

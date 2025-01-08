@@ -54,6 +54,8 @@ const AdminTable: FC<Props> = ({ admins, onUpdate }) => {
     }
   }, [sortField, sortOrder, admins]);
 
+  console.log(admins);
+
   return (
     <Datatable
       isEmpty={sortedAdmins?.length === 0}
@@ -110,7 +112,11 @@ const AdminTable: FC<Props> = ({ admins, onUpdate }) => {
               }
             >
               <DatatableValue className="flex items-center gap-5">
-                <ImagePreview imageRef={admin.photo} />
+                <img
+                  src={admin.photo}
+                  alt="admin-photo"
+                  className="h-20 w-20 object-contain rounded-md"
+                />
                 {admin.name}
               </DatatableValue>
               <DatatableValue>{admin.user.email}</DatatableValue>

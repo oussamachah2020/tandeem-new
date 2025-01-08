@@ -31,7 +31,7 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
       const result = await offerService.addLevel1Offer({
         ...payload,
         imageUrl: payload.imageUrl,
-        couponUrl: payload.couponUrl,
+        coupon: payload.coupon,
       });
       return res.status(200).json(result);
     } else if (roleLevel === 2) {

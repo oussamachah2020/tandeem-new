@@ -10,6 +10,8 @@ import staticValues from "@/common/context/StaticValues";
 import createReport from "docx-templates";
 import qr from "qr-image";
 import {Blob} from "buffer";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { storage } from "../../../../../firebase";
 
 class OfferService {
   getAllForLevel1 = async () => {
@@ -207,69 +209,81 @@ class OfferService {
   addLevel1Offer = async (
     offerDto: OfferCreateDto
   ): Promise<keyof typeof staticValues.notification> => {
-    // const image = await fileService.save('posts/offers', offerDto.image)
-    // let paymentDetails: any;
-    // if (offerDto.subPaymentMethod === SubPaymentMethod.Coupon_Pregenerated) {
-    //   const couponRef = await fileService.save(
-    //     "posts/offers/coupons",
-    //     offerDto.coupon!
-    //   );
-    //   paymentDetails = { couponRef } as CouponPaymentDetails;
-    // } else if (
-    //   offerDto.subPaymentMethod === SubPaymentMethod.Coupon_Generated
-    // ) {
-    //   try {
-    //     const buffer = await createReport({
-    //       template: Buffer.from(await offerDto.coupon!.arrayBuffer()),
-    //       data: JSON.parse(offerDto.paymentDetails),
-    //       cmdDelimiter: ["{", "}"],
-    //       additionalJsContext: {
-    //         qrCode: () => {
-    //           const qrImage = qr.imageSync(offerDto.paymentDetails, {
-    //             type: "png",
-    //             margin: 2,
-    //             size: 4,
-    //           });
-    //           return {
-    //             width: 6,
-    //             height: 6,
-    //             data: qrImage,
-    //             extension: ".png",
-    //           };
-    //         },
-    //       },
-    //     });
-    //     const couponRef = await fileService.save(
-    //       "posts/offers/coupons",
-    //       new Blob([buffer], { type: offerDto.coupon?.type })
-    //     );
-    //     paymentDetails = {
-    //       couponRef,
-    //       data: JSON.parse(offerDto.paymentDetails),
-    //     } as CouponPaymentDetails;
-    //   } catch (e) {
-    //     return "generateCouponError";
-    //   }
-    // } else {
-    //   paymentDetails = JSON.parse(offerDto.paymentDetails);
-    // }
-    // await prisma.offer.create({
-    //   data: {
-    //     title: offerDto.title,
-    //     description: offerDto.description,
-    //     image: offerDto.imageUrl,
-    //     category: offerDto.category,
-    //     from: new Date(offerDto.from),
-    //     to: new Date(offerDto.to),
-    //     initialPrice: Number(offerDto.initialPrice),
-    //     finalPrice: Number(offerDto.finalPrice),
-    //     discount: Number(offerDto.discount),
-    //     subPaymentMethod: offerDto.subPaymentMethod,
-    //     paymentDetails,
-    //     partner: { connect: { id: offerDto.contractorId } },
-    //   },
-    // });
-    return "offerAddedSuccess";
+    let paymentDetails: any;
+
+    try {
+      if (offerDto.subPaymentMethod === SubPaymentMethod.Coupon_Pregenerated) {
+        if (!offerDto.coupon) {
+          return "missingCouponUrlError";
+        }
+        paymentDetails = { couponRef: offerDto.coupon } as CouponPaymentDetails;
+      } else if (
+        offerDto.subPaymentMethod === SubPaymentMethod.Coupon_Generated
+      ) {
+        try {
+          const buffer = await createReport({
+            template: Buffer.from(await offerDto.coupon!.arrayBuffer()),
+            data: JSON.parse(offerDto.paymentDetails),
+            cmdDelimiter: ["{", "}"],
+            additionalJsContext: {
+              qrCode: () => {
+                const qrImage = qr.imageSync(offerDto.paymentDetails, {
+                  type: "png",
+                  margin: 2,
+                  size: 4,
+                });
+                return {
+                  width: 6,
+                  height: 6,
+                  data: qrImage,
+                  extension: ".png",
+                };
+              },
+            },
+          });
+
+          if (!offerDto.coupon) {
+            return "missingGeneratedCouponUrlError";
+          }
+
+          paymentDetails = {
+            couponRef: offerDto.coupon,
+            data: JSON.parse(offerDto.paymentDetails),
+          } as CouponPaymentDetails;
+        } catch (e) {
+          return "generateCouponError";
+        }
+      } else {
+        paymentDetails = JSON.parse(offerDto.paymentDetails);
+      }
+
+      // Ensure image URL is provided
+      if (!offerDto.imageUrl) {
+        return "missingImageUrlError";
+      }
+
+      await prisma.offer.create({
+        data: {
+          title: offerDto.title,
+          description: offerDto.description,
+          image: offerDto.imageUrl, // Only stores URL now
+          category: offerDto.category,
+          from: new Date(offerDto.from),
+          to: new Date(offerDto.to),
+          initialPrice: Number(offerDto.initialPrice),
+          finalPrice: Number(offerDto.finalPrice),
+          discount: Number(offerDto.discount),
+          subPaymentMethod: offerDto.subPaymentMethod,
+          paymentDetails,
+          partner: { connect: { id: offerDto.contractorId } },
+        },
+      });
+
+      return "offerAddedSuccess";
+    } catch (error) {
+      console.error("Error adding offer:", error);
+      return "offerUploadError";
+    }
   };
 
   addLevel2Offer = async (

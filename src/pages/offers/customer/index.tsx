@@ -4,7 +4,7 @@ import { AuthenticatedUser } from "@/common/services/AuthService";
 import { Main } from "@/common/components/global/Main";
 import { SectionName } from "@/common/security/Sections";
 import Tab from "@/common/components/global/Tab";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import offerService from "@/domain/offers/shared/services/OfferService";
 import { getToken } from "next-auth/jwt";
 import { ExternalOffers } from "@/domain/offers/level-two/components/ExternalOffers";
@@ -19,10 +19,36 @@ interface Props {
   offers: Awaited<ReturnType<typeof offerService.getAllForLevel2>>;
 }
 
-const OffersPage: NextPage<Props> = ({ user, customer, offers }) => {
+const OffersPage: NextPage<Props> = ({ user, offers = [] }) => {
+  const { authenticatedUser, accessToken } = useAuthStore();
+  const [selectedTab, setSelectedTab] = useState(0);
+
+  async function fetchCustomerAndOffers() {
+    try {
+      const response = await fetch("/api/offers/read", {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  useEffect(() => {
+    if (authenticatedUser) {
+      fetchCustomerAndOffers();
+    }
+  }, [authenticatedUser]);
+
   const acceptableOffers = useMemo(
     (): AcceptableOffer[] =>
-      offers.map((offer) => {
+      offers?.map((offer) => {
         const acceptedBy = offer.acceptedBy.find(
           ({ customerId }) => customerId === user.customer?.id
         );
@@ -35,11 +61,8 @@ const OffersPage: NextPage<Props> = ({ user, customer, offers }) => {
           };
         else return { ...offer, accepted: false };
       }),
-    [offers, user.customer?.id]
+    [offers, authenticatedUser?.customer?.id]
   );
-  const [selectedTab, setSelectedTab] = useState(0);
-
-  const { authenticatedUser } = useAuthStore();
 
   return (
     <Main section={SectionName.Offers} user={authenticatedUser}>
@@ -68,19 +91,19 @@ const OffersPage: NextPage<Props> = ({ user, customer, offers }) => {
   );
 };
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const user = (await getToken(context)) as unknown as AuthenticatedUser;
-  const customer = await customerService.getOne(user.customer!.id);
-  const offers = await offerService.getAllForLevel2();
-  const result: GetServerSidePropsResult<Props> = {
-    props: {
-      user: JSON.parse(JSON.stringify(user)),
-      customer: JSON.parse(JSON.stringify(customer)),
-      offers: JSON.parse(JSON.stringify(offers)),
-    },
-  };
+// export const getServerSideProps: GetServerSideProps = async (context) => {
+//   const user = (await getToken(context)) as unknown as AuthenticatedUser;
+//   const customer = await customerService.getOne(user.customer!.id);
+//   const offers = await offerService.getAllForLevel2();
+//   const result: GetServerSidePropsResult<Props> = {
+//     props: {
+//       user: JSON.parse(JSON.stringify(user)),
+//       customer: JSON.parse(JSON.stringify(customer)),
+//       offers: JSON.parse(JSON.stringify(offers)),
+//     },
+//   };
 
-  return result;
-};
+//   return result;
+// };
 
 export default OffersPage;

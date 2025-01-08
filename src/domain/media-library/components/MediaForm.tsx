@@ -15,43 +15,72 @@ interface Props {
 const MediaForm = ({ media, onClose }: Props) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { accessToken } = useAuthStore();
+  const { accessToken, authenticatedUser } = useAuthStore();
+
+  console.log(authenticatedUser?.customerId);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsSubmitting(true);
     setError(null);
 
-    toast.loading("Un moment...", { id: "create" });
+    if (media?.id) {
+      toast.loading("Un moment...", { id: "update" });
 
-    const formData = new FormData(event.currentTarget);
-    const data = Object.fromEntries(formData.entries());
+      const formData = new FormData(event.currentTarget);
+      const data = Object.fromEntries(formData.entries());
 
-    try {
-      const response = await fetch(
-        media ? "/api/media-library/update" : "/api/media-library/create",
-        {
+      try {
+        const response = await fetch("/api/media-library/update", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({
+            ...data,
+            customerId: authenticatedUser?.customerId,
+          }),
+        });
+
+        if (!response.ok) {
+          toast.error("Failed to submit the form. Please try again.");
+        }
+        onClose();
+        toast.success("Médias mis à jour avec succès");
+      } catch (err) {
+        setError((err as Error).message);
+      } finally {
+        setIsSubmitting(false);
+        toast.dismiss("update");
+      }
+    } else {
+      toast.loading("Un moment...", { id: "create" });
+
+      const formData = new FormData(event.currentTarget);
+      const data = Object.fromEntries(formData.entries());
+
+      try {
+        const response = await fetch("/api/media-library/create", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${accessToken}`,
           },
           body: JSON.stringify(data),
-        }
-      );
+        });
 
-      if (!response.ok) {
-        throw new Error("Failed to submit the form. Please try again.");
+        if (!response.ok) {
+          throw new Error("Failed to submit the form. Please try again.");
+        }
+        onClose();
+        toast.success("Média enregistré avec succès");
+      } catch (err) {
+        setError((err as Error).message);
+      } finally {
+        setIsSubmitting(false);
+        toast.dismiss("create");
       }
-      onClose();
-      toast.success(
-        media ? "Médias mis à jour avec succès" : "Média enregistré avec succès"
-      );
-    } catch (err) {
-      setError((err as Error).message);
-    } finally {
-      setIsSubmitting(false);
-      toast.dismiss("create");
     }
   };
 

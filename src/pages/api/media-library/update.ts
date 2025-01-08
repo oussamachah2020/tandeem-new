@@ -1,6 +1,5 @@
-import { NextApiRequest, NextApiResponse } from "next";
+import { NextApiResponse } from "next";
 import mediaLibraryService from "@/domain/media-library/services/MediaLibraryService";
-import { MediaDto } from "@/domain/media-library/dto/MediaDto";
 import { AuthenticatedRequest } from "@/apiMiddleware";
 
 async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
@@ -9,27 +8,24 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
   }
 
   try {
-    const { id, title, description, url } = req.body; // Extract media details from request body
+    const { id, title, description, url, customerId } = req.body; // Extract media details from request body
     const user = req?.user; // Get the authenticated user
 
     // Ensure that all required data is present
     if (!id || !title || !description || !url) {
       return res.status(400).json({ message: "Missing required fields" });
     }
-
     // Call the service to update the media
     const updatedMedia = await mediaLibraryService.updateOne({
       id,
       title,
       description,
       url,
-      customerId: user?.customer?.id,
+      customerId,
     });
 
-    if (updatedMedia) {
-      return res
-        .status(200)
-        .json({ message: "Media updated successfully", media: updatedMedia });
+    if (updatedMedia === "mediaUpdatedSuccess") {
+      return res.status(200).json({ message: "Media updated successfully" });
     } else {
       return res.status(404).json({ message: "Media not found" });
     }
