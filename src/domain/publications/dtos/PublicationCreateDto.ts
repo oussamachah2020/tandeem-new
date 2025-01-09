@@ -5,6 +5,7 @@ export interface PublicationCreateDto {
   content: string;
   photos: string[];
   pinned?: boolean;
+  spotlight?: boolean;
   customerId?: string;
 }
 

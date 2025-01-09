@@ -27,28 +27,30 @@ model Publication {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   title     String
   content   String
-  photos     String[]
+  photos    String[]
   pinned    Boolean
+  spotlight Boolean   @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  customerId String?   @db.Uuid
-  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  reactions   Reactions[]
+  customerId String?     @db.Uuid
+  customer   Customer?   @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  reactions  Reactions[]
+
   @@map("publication")
 }
 
 model Customer {
-  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id               String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name             String
   address          String
   website          String
   logo             String
-  category         Category @default(NA)
+  category         Category       @default(NA)
   maxEmployees     Int
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  archived         Boolean @default(false)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  archived         Boolean        @default(false)
   representativeId String         @unique @db.Uuid
   representative   Representative @relation(fields: [representativeId], references: [id], onDelete: NoAction)
   contractId       String         @unique @db.Uuid
@@ -62,7 +64,7 @@ model Customer {
 
   offers       Offer[]       @relation()
   publications Publication[] @relation()
-  Survey Survey[]
+  Survey       Survey[]
 
   @@map("customer")
 }
@@ -82,8 +84,8 @@ model Department {
 }
 
 model Employee {
-  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  firstName     String
+  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  firstName    String
   lastName     String
   registration String?
   phone        String?
@@ -103,9 +105,10 @@ model Employee {
 
   consumedOffers EmployeeConsumedOffers[] @relation
   IdeaBox        IdeaBox[]
-  Reactions Reactions[]
-  Comments Comments[]
-  Survey Survey[]
+  Reactions      Reactions[]
+  Comments       Comments[]
+  Survey         Survey[]
+  OfferCode OfferCode[]
 
   @@map("employee")
 }
@@ -125,11 +128,11 @@ model Offer {
   paymentDetails   Json             @db.JsonB
   latitude         BigInt?
   longitude        BigInt?
-  isSurvey   Boolean       @default(false)
+  isSurvey         Boolean          @default(false)
 
-  status           OfferStatusName  @default(Active)
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
+  status    OfferStatusName @default(Active)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
 
   customerId String?   @db.Uuid
   customer   Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
@@ -138,8 +141,22 @@ model Offer {
 
   acceptedBy        AcceptedOffer[]          @relation
   consumerEmployees EmployeeConsumedOffers[] @relation
+  OfferCode OfferCode[]
 
   @@map("offer")
+}
+
+model OfferCode {
+  id   String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code String
+  isUsed Boolean @default(false)
+  userAt DateTime?
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  offerId String @db.Uuid
+  Offer Offer @relation(fields: [offerId], references: [id])
+  employeeId String @db.Uuid
+  Employee Employee @relation(fields: [employeeId], references: [id])
 }
 
 model AcceptedOffer {
@@ -180,15 +197,15 @@ model Partner {
 }
 
 model Survey {
-  id        String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   title     String
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
-  isSurvey   Boolean       @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isSurvey  Boolean  @default(true)
   paul      Json[]
 
-  employeeId String     @db.Uuid
-  employee Employee @relation(fields: [employeeId], references: [id])
+  employeeId String    @db.Uuid
+  employee   Employee  @relation(fields: [employeeId], references: [id])
   customerId String?   @db.Uuid
   customer   Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
 }
@@ -215,12 +232,12 @@ model User {
   isActive            Boolean   @default(true)
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
-  resetToken           String?  @db.Uuid
-  resetTokenExpiresAt  DateTime?
-  customerId String?   @db.Uuid
-  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  employee   Employee? @relation
-  admin      Admin?    @relation
+  resetToken          String?   @db.Uuid
+  resetTokenExpiresAt DateTime?
+  customerId          String?   @db.Uuid
+  customer            Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  employee            Employee? @relation
+  admin               Admin?    @relation
 
   @@map("user")
 }
@@ -281,7 +298,7 @@ model IdeaBox {
 }
 
 model Categories {
-  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id            String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name          String
   subCategories SubCategories[]
 
@@ -289,36 +306,36 @@ model Categories {
 }
 
 model SubCategories {
-  id     String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name   String
-  
+  id   String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name String
+
   categoryId String     @db.Uuid
-  Category  Categories  @relation(fields: [categoryId], references: [id])
+  Category   Categories @relation(fields: [categoryId], references: [id])
 
   @@map("subCategories")
 }
 
 model Reactions {
-  id     String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid 
-  type        IconType?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  employeeId  String @db.Uuid
-  employee    Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade) 
-  publicationId     String    @db.Uuid
-  Publication Publication @relation(fields: [publicationId], references: [id])
+  id            String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  type          IconType?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  employeeId    String      @db.Uuid
+  employee      Employee    @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  publicationId String      @db.Uuid
+  Publication   Publication @relation(fields: [publicationId], references: [id])
 
   @@map("reactions")
 }
 
 model Comments {
-  id     String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  text        String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  employeeId  String @db.Uuid
-  employee    Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade) 
-  publicationId     String    @db.Uuid
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  text          String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  employeeId    String   @db.Uuid
+  employee      Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  publicationId String   @db.Uuid
 
   @@map("comments")
 }

@@ -24,6 +24,7 @@ class PublicationService {
         title: publicationDto.title,
         content: publicationDto.content,
         pinned: publicationDto.pinned !== undefined,
+        spotlight: publicationDto.spotlight !== undefined,
         photos: publicationDto.photos,
         customerId: publicationDto.customerId ?? null,
       },
@@ -40,6 +41,7 @@ class PublicationService {
         title: publicationDto.title,
         content: publicationDto.content,
         pinned: publicationDto.pinned !== undefined,
+        spotlight: publicationDto.spotlight !== undefined,
       },
       where: publicationDto.customerId
         ? { id: publicationDto.id, customerId: publicationDto.customerId }

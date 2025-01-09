@@ -54,6 +54,7 @@ const PublicationCreateForm = ({ onClose }: { onClose: () => void }) => {
       content: data.content as string,
       photos: [], // Will be updated after upload
       pinned: data.pinned ? true : false,
+      spotlight: data.spotlight ? true : false,
     };
 
     try {
@@ -97,7 +98,6 @@ const PublicationCreateForm = ({ onClose }: { onClose: () => void }) => {
         onClose();
         toast.success("Publication ajoute aves success");
       }
-
     } catch (err: any) {
       setError(err.message || "An unknown error occurred.");
     } finally {
@@ -160,12 +160,19 @@ const PublicationCreateForm = ({ onClose }: { onClose: () => void }) => {
             </ul>
           </div>
           <div>
-            <p>
-              épinglé <span className="text-red-500 text-sm">*</span>
-            </p>
-            <div className="flex flex-row gap-3 text-sm mt-2">
-              <input type="checkbox" name="pinned" />
-              <p>Marquer comme épinglé</p>
+            <div>
+              <p>épinglé</p>
+              <div className="flex flex-row gap-3 text-sm mt-2">
+                <input type="checkbox" name="pinned" />
+                <p>Marquer comme épinglé</p>
+              </div>
+            </div>
+            <div>
+              <p>À la une</p>
+              <div className="flex flex-row gap-3 text-sm mt-2">
+                <input type="checkbox" name="spotlight" />
+                <p>afficher la publication en haut de la page d'accueil</p>
+              </div>
             </div>
           </div>
         </div>
