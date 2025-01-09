@@ -45,7 +45,7 @@ const IdeaBox = () => {
     if (authenticatedUser) {
       try {
         const response = await fetch(
-          `/api/ideabox?id=${authenticatedUser.customerId}`,
+          `/api/idea-box?id=${authenticatedUser.customerId}`,
           {
             method: "GET",
             headers: {

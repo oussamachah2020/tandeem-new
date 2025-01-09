@@ -13,7 +13,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     const pinnedPublications = await prisma.publication.findMany({
       where: { pinned: true },
       orderBy: { createdAt: "desc" },
-      take: 5,
     });
 
     return res.status(200).json(pinnedPublications);

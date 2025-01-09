@@ -222,7 +222,7 @@ class OfferService {
       ) {
         try {
           const buffer = await createReport({
-            template: Buffer.from(await offerDto.coupon!.arrayBuffer()),
+            template: Buffer.from(offerDto.coupon),
             data: JSON.parse(offerDto.paymentDetails),
             cmdDelimiter: ["{", "}"],
             additionalJsContext: {
