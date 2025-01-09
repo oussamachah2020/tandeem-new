@@ -27,6 +27,7 @@ class PublicationService {
         spotlight: publicationDto.spotlight !== undefined,
         photos: publicationDto.photos,
         customerId: publicationDto.customerId ?? null,
+        coverUrl: publicationDto.coverUrl,
       },
     });
     return "publicationAddedSuccess";

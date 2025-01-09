@@ -7,6 +7,7 @@ export interface PublicationCreateDto {
   pinned?: boolean;
   spotlight?: boolean;
   customerId?: string;
+  coverUrl?: string;
 }
 
 export interface PublicationCreateFilesDto {

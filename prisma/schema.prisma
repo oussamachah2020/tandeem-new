@@ -28,8 +28,9 @@ model Publication {
   title     String
   content   String
   photos    String[]
+  coverUrl  String?
   pinned    Boolean
-  spotlight Boolean   @default(false)
+  spotlight Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -108,7 +109,7 @@ model Employee {
   Reactions      Reactions[]
   Comments       Comments[]
   Survey         Survey[]
-  OfferCode OfferCode[]
+  OfferCode      OfferCode[]
 
   @@map("employee")
 }
@@ -141,22 +142,22 @@ model Offer {
 
   acceptedBy        AcceptedOffer[]          @relation
   consumerEmployees EmployeeConsumedOffers[] @relation
-  OfferCode OfferCode[]
+  OfferCode         OfferCode[]
 
   @@map("offer")
 }
 
 model OfferCode {
-  id   String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  code String
-  isUsed Boolean @default(false)
-  userAt DateTime?
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-  offerId String @db.Uuid
-  Offer Offer @relation(fields: [offerId], references: [id])
-  employeeId String @db.Uuid
-  Employee Employee @relation(fields: [employeeId], references: [id])
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code       String
+  isUsed     Boolean   @default(false)
+  userAt     DateTime?
+  expiresAt  DateTime
+  createdAt  DateTime  @default(now())
+  offerId    String    @db.Uuid
+  Offer      Offer     @relation(fields: [offerId], references: [id])
+  employeeId String    @db.Uuid
+  Employee   Employee  @relation(fields: [employeeId], references: [id])
 }
 
 model AcceptedOffer {
