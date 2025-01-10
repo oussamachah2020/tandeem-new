@@ -1,15 +1,26 @@
-import {CouponPaymentDetails, OfferCreateDto, OfferCreateFilesDto} from "@/domain/offers/shared/dtos/OfferCreateDto";
-import {OfferStatusName, SubPaymentMethod} from "@prisma/client";
+import {
+  CouponPaymentDetails,
+  OfferCreateDto,
+  OfferCreateFilesDto,
+} from "@/domain/offers/shared/dtos/OfferCreateDto";
+import { OfferStatusName, SubPaymentMethod } from "@prisma/client";
 import fileService from "@/common/services/FileService";
-import {OfferAcceptDto} from "@/domain/offers/shared/dtos/OfferAcceptDto";
+import { OfferAcceptDto } from "@/domain/offers/shared/dtos/OfferAcceptDto";
 import prisma from "@/common/libs/prisma";
-import {OfferUpdateDto, OfferUpdateFilesDto} from "@/domain/offers/shared/dtos/OfferUpdateDto";
-import {OfferActivationDto} from "@/domain/offers/shared/dtos/OfferActivationDto";
-import {ArrayElement, WithNonNullable, WithRequired} from "@/common/utils/types";
+import {
+  OfferUpdateDto,
+  OfferUpdateFilesDto,
+} from "@/domain/offers/shared/dtos/OfferUpdateDto";
+import { OfferActivationDto } from "@/domain/offers/shared/dtos/OfferActivationDto";
+import {
+  ArrayElement,
+  WithNonNullable,
+  WithRequired,
+} from "@/common/utils/types";
 import staticValues from "@/common/context/StaticValues";
 import createReport from "docx-templates";
 import qr from "qr-image";
-import {Blob} from "buffer";
+import { Blob } from "buffer";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { storage } from "../../../../../firebase";
 
@@ -57,7 +68,7 @@ class OfferService {
   };
 
   updateLevel1Offer = async (
-    offerUpdateDto: OfferUpdateDto & OfferUpdateFilesDto
+    offerUpdateDto: OfferUpdateDto & OfferUpdateFilesDto,
   ): Promise<keyof typeof staticValues.notification> => {
     if (offerUpdateDto.image)
       await fileService.replace(offerUpdateDto.imageRef, offerUpdateDto.image);
@@ -88,7 +99,7 @@ class OfferService {
           });
           await fileService.replace(
             offerUpdateDto.couponRef,
-            new Blob([buffer], { type: offerUpdateDto.coupon.type })
+            new Blob([buffer], { type: offerUpdateDto.coupon.type }),
           );
         } catch (e) {
           return "generateCouponError";
@@ -96,7 +107,7 @@ class OfferService {
       } else {
         await fileService.replace(
           offerUpdateDto.couponRef,
-          offerUpdateDto.coupon
+          offerUpdateDto.coupon,
         );
       }
     }
@@ -130,7 +141,7 @@ class OfferService {
 
   updateLevel2Offer = async (
     offerUpdateDto: WithRequired<OfferUpdateDto, "paymentDetails"> &
-      OfferUpdateFilesDto
+      OfferUpdateFilesDto,
   ): Promise<keyof typeof staticValues.notification> => {
     if (offerUpdateDto.image)
       await fileService.replace(offerUpdateDto.imageRef, offerUpdateDto.image);
@@ -207,57 +218,57 @@ class OfferService {
   };
 
   addLevel1Offer = async (
-    offerDto: OfferCreateDto
+    offerDto: OfferCreateDto,
   ): Promise<keyof typeof staticValues.notification> => {
     let paymentDetails: any;
 
     try {
-      if (offerDto.subPaymentMethod === SubPaymentMethod.Coupon_Pregenerated) {
-        if (!offerDto.coupon) {
-          return "missingCouponUrlError";
-        }
-        paymentDetails = { couponRef: offerDto.coupon } as CouponPaymentDetails;
-      } else if (
-        offerDto.subPaymentMethod === SubPaymentMethod.Coupon_Generated
-      ) {
-        try {
-          const buffer = await createReport({
-            template: Buffer.from(offerDto.coupon),
-            data: JSON.parse(offerDto.paymentDetails),
-            cmdDelimiter: ["{", "}"],
-            additionalJsContext: {
-              qrCode: () => {
-                const qrImage = qr.imageSync(offerDto.paymentDetails, {
-                  type: "png",
-                  margin: 2,
-                  size: 4,
-                });
-                return {
-                  width: 6,
-                  height: 6,
-                  data: qrImage,
-                  extension: ".png",
-                };
-              },
-            },
-          });
+      //   if (offerDto.subPaymentMethod === SubPaymentMethod.Coupon_Pregenerated) {
+      //     if (!offerDto.coupon) {
+      //       return "missingCouponUrlError";
+      //     }
+      //     paymentDetails = { couponRef: offerDto.coupon } as CouponPaymentDetails;
+      //   } else if (
+      //     offerDto.subPaymentMethod === SubPaymentMethod.Coupon_Generated
+      //   ) {
+      //     try {
+      //       const buffer = await createReport({
+      //         template: Buffer.from(offerDto.coupon),
+      //         data: JSON.parse(offerDto.paymentDetails),
+      //         cmdDelimiter: ["{", "}"],
+      //         additionalJsContext: {
+      //           qrCode: () => {
+      //             const qrImage = qr.imageSync(offerDto.paymentDetails, {
+      //               type: "png",
+      //               margin: 2,
+      //               size: 4,
+      //             });
+      //             return {
+      //               width: 6,
+      //               height: 6,
+      //               data: qrImage,
+      //               extension: ".png",
+      //             };
+      //           },
+      //         },
+      //       });
 
-          if (!offerDto.coupon) {
-            return "missingGeneratedCouponUrlError";
-          }
+      //       if (!offerDto.coupon) {
+      //         return "missingGeneratedCouponUrlError";
+      //       }
 
-          paymentDetails = {
-            couponRef: offerDto.coupon,
-            data: JSON.parse(offerDto.paymentDetails),
-          } as CouponPaymentDetails;
-        } catch (e) {
-          return "generateCouponError";
-        }
-      } else {
-        paymentDetails = JSON.parse(offerDto.paymentDetails);
-      }
+      //       paymentDetails = {
+      //         couponRef: offerDto.coupon,
+      //         data: JSON.parse(offerDto.paymentDetails),
+      //       } as CouponPaymentDetails;
+      //     } catch (e) {
+      //       return "generateCouponError";
+      //     }
+      //   } else {
+      //     paymentDetails = JSON.parse(offerDto.paymentDetails);
+      //   }
 
-      // Ensure image URL is provided
+      //   // Ensure image URL is provided
       if (!offerDto.imageUrl) {
         return "missingImageUrlError";
       }
@@ -270,6 +281,7 @@ class OfferService {
           category: offerDto.category,
           from: new Date(offerDto.from),
           to: new Date(offerDto.to),
+          codePromo: offerDto.codePromo,
           initialPrice: Number(offerDto.initialPrice),
           finalPrice: Number(offerDto.finalPrice),
           discount: Number(offerDto.discount),
@@ -287,7 +299,7 @@ class OfferService {
   };
 
   addLevel2Offer = async (
-    offerDto: OfferCreateDto
+    offerDto: OfferCreateDto,
   ): Promise<keyof typeof staticValues.notification> => {
     await prisma.offer.create({
       data: {
@@ -309,7 +321,7 @@ class OfferService {
   };
 
   deleteOffer = async (
-    id: string
+    id: string,
   ): Promise<keyof typeof staticValues.notification> => {
     await prisma.offer.delete({ where: { id } });
     return "offerDeletedSuccess";
@@ -318,9 +330,9 @@ class OfferService {
 
 let offerService: OfferService;
 
-if (process.env.NODE_ENV === 'production') offerService = new OfferService();
+if (process.env.NODE_ENV === "production") offerService = new OfferService();
 else {
-    if (!global.offerService) global.offerService = new OfferService();
-    offerService = global.offerService;
+  if (!global.offerService) global.offerService = new OfferService();
+  offerService = global.offerService;
 }
 export default offerService;

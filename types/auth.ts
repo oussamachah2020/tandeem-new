@@ -12,6 +12,9 @@ export type User = {
   email: string;
   role: Role;
   customerId: string;
+  admin: {
+    photo: string;
+  };
   customer: Customer | null;
   employee: Employee | null;
 };

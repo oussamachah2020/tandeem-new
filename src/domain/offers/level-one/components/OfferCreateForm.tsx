@@ -17,9 +17,10 @@ import toast from "react-hot-toast";
 
 interface Props {
   partners: Awaited<ReturnType<typeof partnerService.getAll>>;
+  onClose: () => void;
 }
 
-export const OfferCreateForm = ({ partners }: Props) => {
+export const OfferCreateForm = ({ partners, onClose }: Props) => {
   const { label, tooltip, subCategory } = useStaticValues();
   const [selectedPartner, setSelectedPartner] =
     useState<ArrayElement<typeof partners>>();
@@ -31,7 +32,7 @@ export const OfferCreateForm = ({ partners }: Props) => {
 
   const handlePartnerSelect = (e: ChangeEvent<HTMLSelectElement>) => {
     const partner = partners.find(
-      (partner) => partner.id === e.currentTarget.value
+      (partner) => partner.id === e.currentTarget.value,
     );
     setSelectedPartner(partner);
   };
@@ -44,11 +45,27 @@ export const OfferCreateForm = ({ partners }: Props) => {
     return getDownloadURL(storageRef);
   };
 
+  function generatePromoCode(length: number = 8): string {
+    const characters =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let promoCode = "";
+
+    for (let i = 0; i < length; i++) {
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      promoCode += characters[randomIndex];
+    }
+
+    return promoCode;
+  }
+
+  // Example usage:
+
   const handleSubmit = async (formData: FormData) => {
     setIsSubmitting(true);
     setError(null);
 
     toast.loading("Un moment...", { id: "create" });
+    const newPromoCode = generatePromoCode();
 
     try {
       // Upload image to Firebase Storage
@@ -60,7 +77,7 @@ export const OfferCreateForm = ({ partners }: Props) => {
         title: formData.get("title") as string,
         description: formData.get("description") as string,
         category: formData.get("category") as SubCategory,
-        subPaymentMethod: formData.get("subPaymentMethod") as SubPaymentMethod,
+        subPaymentMethod: SubPaymentMethod.PromoCode_OneCode,
         from: formData.get("from") as string,
         to: formData.get("to") as string,
         discount: formData.get("discount") as string,
@@ -68,7 +85,7 @@ export const OfferCreateForm = ({ partners }: Props) => {
         finalPrice: formData.get("finalPrice") as string,
         paymentDetails: formData.get("paymentDetails") as string,
         imageUrl: imageUrl || "",
-        coupon: formData.get("couponUrl") as string,
+        codePromo: newPromoCode,
       };
 
       // Send the data to the API endpoint
@@ -85,6 +102,7 @@ export const OfferCreateForm = ({ partners }: Props) => {
         toast.error("Failed to create offer. Please try again.");
       }
 
+      onClose();
       toast.success("Offre créée avec succès !");
     } catch (error: any) {
       setError(error.message || "An unknown error occurred.");
@@ -126,7 +144,7 @@ export const OfferCreateForm = ({ partners }: Props) => {
           onChange={handlePartnerSelect}
           options={partners.reduce(
             (acc, partner) => ({ ...acc, [partner.id]: partner.name }),
-            {}
+            {},
           )}
         />
         <Input
@@ -136,7 +154,7 @@ export const OfferCreateForm = ({ partners }: Props) => {
           placeholder={label.chooseCategory}
           type="select"
           options={Object.fromEntries(
-            getLabeledSubCategories(subCategory, selectedPartner?.category)
+            getLabeledSubCategories(subCategory, selectedPartner?.category),
           )}
         />
         <Input
@@ -188,12 +206,12 @@ export const OfferCreateForm = ({ partners }: Props) => {
             </div>,
           ]}
         />
-        {selectedPartner?.accepts === PaymentMethod.PromoCode && (
+        {/* {selectedPartner?.accepts === PaymentMethod.PromoCode && (
           <PromoCodeForm className="col-span-2" />
         )}
         {selectedPartner?.accepts === PaymentMethod.Coupon && (
           <CouponForm className="col-span-2" />
-        )}
+        )} */}
       </div>
       <Input
         icon="CloudArrowUpIcon"

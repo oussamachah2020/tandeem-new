@@ -1,4 +1,4 @@
-import {FC, useState} from "react";
+import { FC, useState } from "react";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { getDownloadUrl } from "@/common/utils/functions";
 import { Dropdown } from "@/common/components/global/Dropdown";
@@ -16,7 +16,9 @@ interface Props {
 export const TitleBar: FC<Props> = ({ title, userImageSrc }) => {
   const { action } = useStaticValues();
   const [isDropdownShown, setIsDropdownShown] = useState(false);
-  const { logout } = useAuthStore();
+  const { logout, authenticatedUser } = useAuthStore();
+
+  console.log(authenticatedUser);
 
   return (
     <div className="flex justify-start items-center w-full">
@@ -27,11 +29,13 @@ export const TitleBar: FC<Props> = ({ title, userImageSrc }) => {
       >
         <img
           src={
-            userImageSrc ? getDownloadUrl(userImageSrc) : "/img/logo-blue-1.svg"
+            authenticatedUser?.admin?.photo
+              ? authenticatedUser?.admin?.photo
+              : "/img/logo-blue-1.svg"
           }
           alt="User avatar"
           className={
-            userImageSrc
+            authenticatedUser?.admin?.photo
               ? "w-14 h-14 aspect-square object-cover rounded-xl"
               : "w-10 h-10 object-contain rounded-lg"
           }

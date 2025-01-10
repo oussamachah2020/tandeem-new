@@ -36,18 +36,18 @@ const Offers = ({}: Props) => {
     useModal<Offer>();
 
   const [offers, setOffers] = useState<Offer[]>([]);
+  const [partners, setPartners] = useState<Partner[]>([]);
 
   const [searchResultedOffers, onSearchInputChange] = useSearch(offers, [
     "title",
   ]);
   const [filteredOffers, onFilterValueChange] = useFilter(
     searchResultedOffers,
-    ["partner.id" as any, "status"]
+    ["partner.id" as any, "status"],
   );
   const { authenticatedUser, accessToken } = useAuthStore();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [partners, setPartners] = useState<Partner[]>([]);
 
   const fetchPartners = async () => {
     setLoading(true);
@@ -72,14 +72,14 @@ const Offers = ({}: Props) => {
     setLoading(true);
 
     try {
-      const response = await fetch("/api/offers/consume", {
+      const response = await fetch("/api/offers/read", {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
       });
       if (!response.ok) console.error("Failed to fetch customers.");
       const data = await response.json();
-      console.log(data);
+      setOffers(data.offers);
     } catch (err: any) {
       console.error(err.message);
     } finally {
@@ -90,7 +90,7 @@ const Offers = ({}: Props) => {
   useEffect(() => {
     fetchPartners();
     fetchOffers();
-  }, []);
+  }, [accessToken]);
 
   useEffect(() => {
     if (authenticatedUser) {
@@ -113,7 +113,7 @@ const Offers = ({}: Props) => {
           <Filter
             label="Partenaire"
             icon="BriefcaseIcon"
-            values={[].map(({ id, name }) => [id, name])}
+            values={[]?.map(({ id, name }) => [id, name])}
             onValueChange={(e: ChangeEvent<HTMLSelectElement>) =>
               onFilterValueChange("partner.id" as any, e)
             }
@@ -139,7 +139,10 @@ const Offers = ({}: Props) => {
         onClose={() => toggleAddOfferModal(false)}
         width=""
       >
-        <OfferCreateForm partners={partners} />
+        <OfferCreateForm
+          partners={partners}
+          onClose={() => toggleAddOfferModal(false)}
+        />
       </Modal>
       <Modal
         title="Détails de l'offre"

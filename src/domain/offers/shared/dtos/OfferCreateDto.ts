@@ -1,5 +1,5 @@
-import {Blob} from 'buffer'
-import {SubCategory, SubPaymentMethod} from "@prisma/client";
+import { Blob } from "buffer";
+import { SubCategory, SubPaymentMethod } from "@prisma/client";
 
 export interface OfferCreateDto {
   contractorId: string;
@@ -9,36 +9,36 @@ export interface OfferCreateDto {
   subPaymentMethod: SubPaymentMethod;
   from: string;
   to: string;
+  codePromo: string;
   discount?: string;
   initialPrice?: string;
   finalPrice?: string;
   paymentDetails: string;
   imageUrl: string;
-  coupon: string;
+  // coupon: string;
 }
 
 export interface OfferCreateFilesDto {
-    image: Blob
-    coupon?: Blob
+  image: Blob;
+  coupon?: Blob;
 }
 
 export interface PromoCodeOnePaymentDetails {
-    code: string
-    usageLimit: number,
-    used: number
+  code: string;
+  usageLimit: number;
+  used: number;
 }
 
 export interface PromoCodeMultiplePaymentDetails {
-    codes: string[]
-    usedCodes: string[]
+  codes: string[];
+  usedCodes: string[];
 }
 
 export interface CouponPaymentDetails {
-    couponRef: string
-    data?: any
+  couponRef: string;
+  data?: any;
 }
 
 export interface NAPaymentDetails {
-    description: string
+  description: string;
 }
-

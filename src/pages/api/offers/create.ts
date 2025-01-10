@@ -18,8 +18,10 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
       return res.status(405).json({ error: "Method not allowed" });
     }
 
+    console.log(user.role);
+
     const payload: OfferCreateDto = req.body;
-    const roleLevel = getRoleLevel(user.role);
+    const roleLevel = getRoleLevel(user?.role);
 
     // Validate required fields in the payload
     if (!payload || !payload.title || !payload.description) {
@@ -31,8 +33,8 @@ const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
       const result = await offerService.addLevel1Offer({
         ...payload,
         imageUrl: payload.imageUrl,
-        coupon: payload.coupon,
       });
+
       return res.status(200).json(result);
     } else if (roleLevel === 2) {
       const result = await offerService.addLevel2Offer({

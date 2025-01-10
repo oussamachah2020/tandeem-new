@@ -15,11 +15,12 @@ import {object, string} from "zod";
 import { Role } from "@prisma/client";
 import { useAuthStore } from "@/zustand/auth-store";
 
-interface Props {
-  user: AuthenticatedUser;
-}
+// interface Props {
+//   user: AuthenticatedUser;
+// }
 
 const validatePasswordUpdateForm: FormValidator = async (formData) => {
+
   const messages = await validate(
     formData,
     object({
@@ -34,12 +35,15 @@ const validatePasswordUpdateForm: FormValidator = async (formData) => {
   return messages.length ? messages[0] : null;
 };
 
-const Profile: FC<Props> = ({ user }) => {
+const Profile = () => {
   const { label, action, role } = useStaticValues();
   const [loading, setLoading] = useState(false);
+  const { authenticatedUser } = useAuthStore();
+  const user = authenticatedUser;
+
   const imageUrl = useMemo(() => {
-    return user.image ? user.image : "/img/logo-blue-1.svg";
-  }, [user.role, user.image]);
+    return user?.admin?.photo ? user?.admin?.photo : "/img/logo-blue-1.svg";
+  }, [user?.role, user?.admin?.photo]);
 
   const validator = useCallback(async (formData: FormData) => {
     setLoading(true);
@@ -47,8 +51,6 @@ const Profile: FC<Props> = ({ user }) => {
     if (messages) setLoading(false);
     return messages;
   }, []);
-
-  const { authenticatedUser } = useAuthStore();
 
   return (
     <Main section={SectionName.Profile} user={authenticatedUser}>
@@ -67,30 +69,30 @@ const Profile: FC<Props> = ({ user }) => {
             </div>
             <div className="flex flex-col gap-1.5">
               <div className="grid grid-cols-3 gap-4">
-                {user.role !== Role.TANDEEM && (
+                {user?.role !== Role.TANDEEM && (
                   <Input
                     label={label.name}
                     icon="UserIcon"
                     disabled={true}
-                    initialValue={user.name}
+                    initialValue={user?.name}
                   />
                 )}
                 <Input
                   label={label.email}
                   icon="EnvelopeIcon"
                   disabled={true}
-                  initialValue={user.email}
+                  initialValue={user?.email}
                 />
                 <Input
                   label={label.role}
                   icon="CubeIcon"
                   disabled={true}
-                  initialValue={role[user.role]}
+                  initialValue={role[user?.role ?? "TANDEEM"]}
                 />
               </div>
             </div>
           </div>
-          {getRoleLevel(user.role) === 2 && (
+          {getRoleLevel(user?.role ?? "TANDEEM") === 2 && (
             <div className="flex flex-col gap-4">
               <div className="text-primary text-xl font-medium">
                 {label.conditions}
@@ -101,7 +103,7 @@ const Profile: FC<Props> = ({ user }) => {
                     label={label.maxNumberOfEmployees}
                     icon="UsersIcon"
                     disabled={true}
-                    initialValue={user.customer?.maxEmployees}
+                    initialValue={user?.customer?.maxEmployees}
                   />
                 </div>
               </div>
@@ -155,14 +157,14 @@ const Profile: FC<Props> = ({ user }) => {
   );
 };
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-    const user = (await getToken(context)) as unknown as AuthenticatedUser
-    const result: GetServerSidePropsResult<Props> = {
-        props: {
-            user: JSON.parse(JSON.stringify(user))
-        }
-    }
-    return result
-}
+// export const getServerSideProps: GetServerSideProps = async (context) => {
+//     const user = (await getToken(context)) as unknown as AuthenticatedUser
+//     const result: GetServerSidePropsResult<Props> = {
+//         props: {
+//             user: JSON.parse(JSON.stringify(user))
+//         }
+//     }
+//     return result
+// }
 
 export default Profile

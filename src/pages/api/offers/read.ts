@@ -10,12 +10,10 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
   try {
     const user = req.user;
 
-    console.log(user);
-
-    const customer = await customerService.getOne(user?.customer!.id);
+    // const customer = await customerService.getOne(user?.customer!.id);
     const offers = await offerService.getAllForLevel2();
 
-    return res.status(200).json({ customer, offers });
+    return res.status(200).json({ offers });
   } catch (error) {
     return res.status(500).json(error);
   }

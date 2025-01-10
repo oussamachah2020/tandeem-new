@@ -1,26 +1,38 @@
-import {NextApiResponse} from "next";
+import { NextApiResponse } from "next";
 import prisma from "@/common/libs/prisma";
-import {constants} from "http2";
+import { constants } from "http2";
 import { AuthenticatedRequest, authMiddleware } from "@/apiMiddleware";
 
 async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ message: "Method not allowed" });
+  }
+
   const user = req?.user;
-  const { description, title } = req.body;
+  const { title, description } = req.body;
+
   if (user) {
-    const employee = await prisma.employee.findUnique({
+    const targetEmployee = await prisma.user.findUnique({
       where: { id: user?.id },
+      include: { employee: { select: { id: true } } },
     });
-    if (employee) {
+
+    if (targetEmployee && targetEmployee.employee) {
       await prisma.ideaBox.create({
         data: {
           title,
           description,
-          employeeId: employee.id,
+          employeeId: targetEmployee?.employee?.id,
         },
       });
-      res.status(constants.HTTP_STATUS_OK).end();
+
+      res
+        .status(constants.HTTP_STATUS_OK)
+        .json({ message: "data inserted successfully" });
     } else {
-      res.status(constants.HTTP_STATUS_NOT_FOUND).end();
+      res
+        .status(constants.HTTP_STATUS_NOT_FOUND)
+        .json({ message: "Employee not found" });
     }
   }
 }

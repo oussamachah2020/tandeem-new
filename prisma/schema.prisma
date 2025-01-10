@@ -109,7 +109,6 @@ model Employee {
   Reactions      Reactions[]
   Comments       Comments[]
   Survey         Survey[]
-  OfferCode      OfferCode[]
 
   @@map("employee")
 }
@@ -130,10 +129,10 @@ model Offer {
   latitude         BigInt?
   longitude        BigInt?
   isSurvey         Boolean          @default(false)
-
-  status    OfferStatusName @default(Active)
-  createdAt DateTime        @default(now())
-  updatedAt DateTime        @updatedAt
+  codePromo        String
+  status           OfferStatusName  @default(Active)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
 
   customerId String?   @db.Uuid
   customer   Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
@@ -142,23 +141,22 @@ model Offer {
 
   acceptedBy        AcceptedOffer[]          @relation
   consumerEmployees EmployeeConsumedOffers[] @relation
-  OfferCode         OfferCode[]
 
   @@map("offer")
 }
 
-model OfferCode {
-  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  code       String
-  isUsed     Boolean   @default(false)
-  userAt     DateTime?
-  expiresAt  DateTime
-  createdAt  DateTime  @default(now())
-  offerId    String    @db.Uuid
-  Offer      Offer     @relation(fields: [offerId], references: [id])
-  employeeId String    @db.Uuid
-  Employee   Employee  @relation(fields: [employeeId], references: [id])
-}
+// model OfferCode {
+//   id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+//   code       String
+//   isUsed     Boolean   @default(false)
+//   userAt     DateTime?
+//   expiresAt  DateTime
+//   createdAt  DateTime  @default(now())
+//   offerId    String    @db.Uuid
+//   Offer      Offer     @relation(fields: [offerId], references: [id])
+//   employeeId String    @db.Uuid
+//   Employee   Employee  @relation(fields: [employeeId], references: [id])
+// }
 
 model AcceptedOffer {
   id        String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid

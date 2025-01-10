@@ -1,5 +1,4 @@
 import { NextApiResponse } from "next";
-import { PartnerCreateDto } from "@/domain/partners/dtos/PartnerCreateDto";
 import { AuthenticatedRequest, authMiddleware } from "@/apiMiddleware";
 import partnerService from "@/domain/partners/services/PartnerService";
 
