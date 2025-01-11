@@ -10,10 +10,14 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
   try {
     const user = req.user;
 
+    if (user?.role === "TANDEEM") {
+      const offers = await offerService.getAllForLevel1();
+      return res.status(200).json({ offers });
+    } else {
+      const offers = await offerService.getAllForLevel2();
+      return res.status(200).json({ offers });
+    }
     // const customer = await customerService.getOne(user?.customer!.id);
-    const offers = await offerService.getAllForLevel2();
-
-    return res.status(200).json({ offers });
   } catch (error) {
     return res.status(500).json(error);
   }

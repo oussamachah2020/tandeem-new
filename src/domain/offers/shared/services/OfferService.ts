@@ -209,10 +209,10 @@ class OfferService {
     active,
   }: OfferActivationDto): Promise<keyof typeof staticValues.notification> => {
     await prisma.offer.update({
+      where: { id: offerId },
       data: {
         status: active ? OfferStatusName.Active : OfferStatusName.Inactive,
       },
-      where: { id: offerId },
     });
     return active ? "offerEnabledSuccess" : "offerDisabledSuccess";
   };

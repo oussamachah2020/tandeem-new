@@ -1,8 +1,8 @@
-import {FC, ReactNode, useMemo, useState} from "react";
+import { FC, ReactNode, useMemo, useState } from "react";
 import ActionButton from "@/common/components/atomic/ActionButton";
-import {Modal} from "@/common/components/global/Modal";
-import * as Icons from '@heroicons/react/24/outline'
-import {useStaticValues} from "@/common/context/StaticValuesContext";
+import { Modal } from "@/common/components/global/Modal";
+import * as Icons from "@heroicons/react/24/outline";
+import { useStaticValues } from "@/common/context/StaticValuesContext";
 import Form from "@/common/components/global/Form";
 import Button from "./Button";
 import { TrashIcon } from "lucide-react";
@@ -52,7 +52,11 @@ const ConfirmableActionButton: FC<Props> = ({
       });
 
       if (response.ok) {
-        toast.success("data supprimé avec succès");
+        const data = await response.json();
+        console.log(data.message);
+        toast.success(
+          data.message ? data.message : "data supprimé avec succès",
+        );
       }
     } catch (error) {
       console.error(error);
@@ -126,6 +130,4 @@ const ConfirmableActionButton: FC<Props> = ({
     </>
   );
 };
-;
-
-export default ConfirmableActionButton
+export default ConfirmableActionButton;

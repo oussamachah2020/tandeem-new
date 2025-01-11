@@ -141,22 +141,23 @@ model Offer {
 
   acceptedBy        AcceptedOffer[]          @relation
   consumerEmployees EmployeeConsumedOffers[] @relation
+  UsedCodesPromo    UsedCodesPromo[]
 
   @@map("offer")
 }
 
-// model OfferCode {
-//   id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-//   code       String
-//   isUsed     Boolean   @default(false)
-//   userAt     DateTime?
-//   expiresAt  DateTime
-//   createdAt  DateTime  @default(now())
-//   offerId    String    @db.Uuid
-//   Offer      Offer     @relation(fields: [offerId], references: [id])
-//   employeeId String    @db.Uuid
-//   Employee   Employee  @relation(fields: [employeeId], references: [id])
-// }
+model UsedCodesPromo {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code          String
+  isUsed        Boolean   @default(false)
+  usedAt        DateTime? @default(now())
+  createdAt     DateTime  @default(now())
+  employeePhone String
+  offerId       String    @db.Uuid
+  Offer         Offer     @relation(fields: [offerId], references: [id])
+
+  @@map("usedCodes")
+}
 
 model AcceptedOffer {
   id        String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
@@ -288,10 +289,10 @@ model IdeaBox {
   archived    Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  isAnonymous Boolean @default(false)
+  isAnonymous Boolean  @default(false)
 
-  employeeId String @db.Uuid
-  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employeeId String   @db.Uuid
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
   @@map("idea_box")
 }

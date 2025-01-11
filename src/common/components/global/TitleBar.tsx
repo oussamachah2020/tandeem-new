@@ -18,8 +18,6 @@ export const TitleBar: FC<Props> = ({ title, userImageSrc }) => {
   const [isDropdownShown, setIsDropdownShown] = useState(false);
   const { logout, authenticatedUser } = useAuthStore();
 
-  console.log(authenticatedUser);
-
   return (
     <div className="flex justify-start items-center w-full">
       <h1 className="text-3xl font-medium w-full">{title}</h1>

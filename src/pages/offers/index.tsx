@@ -18,18 +18,14 @@ import { ArrayElement } from "@/common/utils/types";
 import { getRoleLevel } from "@/common/utils/functions";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/zustand/auth-store";
-
-interface Props {
-  // partners: Awaited<ReturnType<typeof partnerService.getAll>>;
-  // offers: Awaited<ReturnType<typeof offerService.getAllForLevel1>>;
-}
+import { RefreshCcw } from "lucide-react";
 
 type Partner = Awaited<ReturnType<typeof partnerService.getAll>>;
 type Offer = ArrayElement<
   Awaited<ReturnType<typeof offerService.getAllForLevel1>>
 >;
 
-const Offers = ({}: Props) => {
+const Offers = () => {
   const [, isAddOfferModalShown, toggleAddOfferModal] = useModal(false);
   const [offerToShow, isOfferModalShown, toggleOfferModal] = useModal<Offer>();
   const [offerToUpdate, isOfferUpdateModalShown, toggleOfferUpdateModal] =
@@ -127,11 +123,17 @@ const Offers = ({}: Props) => {
             }
           />
         </FilterGroup>
-        <OfferTable
-          offers={filteredOffers}
-          onClick={(offer: any) => toggleOfferModal(true, offer)}
-          onUpdate={(offer: any) => toggleOfferUpdateModal(true, offer)}
-        />
+        {loading ? (
+          <div className="h-40 flex justify-center items-center w-full bg-white">
+            <RefreshCcw className="h-10 w-10 animate-spin text-primary" />
+          </div>
+        ) : (
+          <OfferTable
+            offers={filteredOffers}
+            onClick={(offer: any) => toggleOfferModal(true, offer)}
+            onUpdate={(offer: any) => toggleOfferUpdateModal(true, offer)}
+          />
+        )}
       </Main>
       <Modal
         title="Ajouter une offre"

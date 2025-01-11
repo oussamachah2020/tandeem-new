@@ -16,56 +16,12 @@ interface Props {
   onUpdate: (offer: any) => void;
 }
 
-// const MOCK_OFFERS = [
-//   {
-//     id: "offer1",
-//     partner: {
-//       logo: "",
-//       category: "electronics", // Key for category lookup
-//     },
-//     title: "Smartphone Sale",
-//     category: "phones", // Key for subCategory lookup
-//     subCategory: "smartphones",
-//     status: "Active", // Assuming OfferStatusName includes "Active"
-//   },
-//   {
-//     id: "offer2",
-//     partner: {
-//       logo: "",
-//       category: "furniture",
-//     },
-//     title: "Office Chair Discount",
-//     category: "chairs",
-//     subCategory: "office chairs",
-//     status: "Inactive", // Assuming OfferStatusName includes "Inactive"
-//   },
-//   {
-//     id: "offer3",
-//     partner: {
-//       logo: "",
-//       category: "appliances",
-//     },
-//     title: "Microwave Clearance",
-//     category: "kitchen",
-//     subCategory: "microwaves",
-//     status: "Active",
-//   },
-//   {
-//     id: "offer4",
-//     partner: {
-//       logo: "",
-//       category: "fashion",
-//     },
-//     title: "Winter Jackets Promo",
-//     category: "clothing",
-//     subCategory: "jackets",
-//     status: "Inactive",
-//   },
-// ];
-
 const OfferTable = ({ offers, onClick, onUpdate }: Props) => {
   const { label, action, tooltip, confirmation, category, subCategory } =
     useStaticValues();
+
+  console.log(offers);
+
   return (
     <Datatable
       headers={[
@@ -77,9 +33,9 @@ const OfferTable = ({ offers, onClick, onUpdate }: Props) => {
       ]}
       isEmpty={offers?.length === 0}
     >
-      {offers?.map((offer, idx) => (
+      {offers?.map((offer) => (
         <DatatableRow
-          key={idx}
+          key={offer?.id}
           onClick={() => onClick(offer)}
           onUpdate={() => onUpdate(offer)}
           onDelete={{
@@ -124,7 +80,7 @@ const OfferTable = ({ offers, onClick, onUpdate }: Props) => {
             <Label>{subCategory[offer.category]}</Label>
           </DatatableValue>
           <DatatableValue>
-            <OfferStatus status={"Active"} />
+            <OfferStatus status={offer.status} />
           </DatatableValue>
         </DatatableRow>
       ))}
