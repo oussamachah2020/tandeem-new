@@ -17,7 +17,7 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
   });
 
   if (existingIdeaBox) {
-    await prisma.ideaBox.update({
+    const updatedIdea = await prisma.ideaBox.update({
       where: {
         id,
       },
@@ -30,7 +30,7 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
 
     res
       .status(constants.HTTP_STATUS_OK)
-      .json({ message: "data updated successfully" });
+      .json({ message: "data updated successfully", idea: updatedIdea });
   } else {
     res
       .status(constants.HTTP_STATUS_NOT_FOUND)

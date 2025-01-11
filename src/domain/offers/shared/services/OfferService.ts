@@ -301,22 +301,22 @@ class OfferService {
   addLevel2Offer = async (
     offerDto: OfferCreateDto,
   ): Promise<keyof typeof staticValues.notification> => {
-    await prisma.offer.create({
-      data: {
-        title: offerDto.title,
-        description: offerDto.description,
-        image: offerDto.imageUrl,
-        category: offerDto.category,
-        from: new Date(offerDto.from),
-        to: new Date(offerDto.to),
-        initialPrice: Number(offerDto.initialPrice),
-        finalPrice: Number(offerDto.finalPrice),
-        discount: Number(offerDto.discount),
-        subPaymentMethod: SubPaymentMethod.NA,
-        paymentDetails: JSON.parse(offerDto.paymentDetails),
-        customer: { connect: { id: offerDto.contractorId } },
-      },
-    });
+    // await prisma.offer.create({
+    //   data: {
+    //     title: offerDto.title,
+    //     description: offerDto.description,
+    //     image: offerDto.imageUrl,
+    //     category: offerDto.category,
+    //     from: new Date(offerDto.from),
+    //     to: new Date(offerDto.to),
+    //     initialPrice: Number(offerDto.initialPrice),
+    //     finalPrice: Number(offerDto.finalPrice),
+    //     discount: Number(offerDto.discount),
+    //     subPaymentMethod: SubPaymentMethod.NA,
+    //     paymentDetails: JSON.parse(offerDto.paymentDetails),
+    //     customer: { connect: { id: offerDto.contractorId } },
+    //   },
+    // });
     return "offerAddedSuccess";
   };
 

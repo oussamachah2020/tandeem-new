@@ -18,7 +18,7 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
     });
 
     if (targetEmployee && targetEmployee.employee) {
-      await prisma.ideaBox.create({
+      const createdIdea = await prisma.ideaBox.create({
         data: {
           title,
           description,
@@ -29,7 +29,7 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
 
       res
         .status(constants.HTTP_STATUS_OK)
-        .json({ message: "data inserted successfully" });
+        .json({ message: "data inserted successfully", idea: createdIdea });
     } else {
       res
         .status(constants.HTTP_STATUS_NOT_FOUND)
