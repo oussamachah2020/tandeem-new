@@ -20,12 +20,10 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
           employeeId: user?.id as string,
         },
       });
-      return res
-        .status(201)
-        .json({
-          message: "Comment added successfully",
-          comment: updatedComment,
-        });
+      return res.status(200).json({
+        message: "Comment added successfully",
+        comment: updatedComment,
+      });
     } catch (error) {
       console.error("Error upserting comment:", error);
       return res.status(500).json({ message: "Failed to process the request" });
