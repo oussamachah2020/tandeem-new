@@ -1,19 +1,19 @@
-import {FC} from "react";
+import { FC } from "react";
 import Datatable from "@/common/components/datatable/Datatable";
 import Label from "@/common/components/atomic/Label";
 import offerService from "@/domain/offers/shared/services/OfferService";
-import {DatatableRow} from "@/common/components/datatable/DatatableRow";
-import {DatatableValue} from "@/common/components/datatable/DatatableValue";
-import {ImagePreview} from "@/common/components/global/ImagePreview";
+import { DatatableRow } from "@/common/components/datatable/DatatableRow";
+import { DatatableValue } from "@/common/components/datatable/DatatableValue";
+import { ImagePreview } from "@/common/components/global/ImagePreview";
 import OfferStatus from "@/domain/offers/shared/components/OfferStatus";
-import {OfferStatusName} from "@prisma/client";
+import { OfferStatusName } from "@prisma/client";
 import ConfirmableActionButton from "@/common/components/atomic/ConfirmableActionButton";
-import {useStaticValues} from "@/common/context/StaticValuesContext";
+import { useStaticValues } from "@/common/context/StaticValuesContext";
 
 interface Props {
-    offers: Awaited<ReturnType<typeof offerService.getAllForLevel1>>
-    onClick: (offer: any) => void
-    onUpdate: (offer: any) => void
+  offers: Awaited<ReturnType<typeof offerService.getAllForLevel1>>;
+  onClick: (offer: any) => void;
+  onUpdate: (offer: any) => void;
 }
 
 // const MOCK_OFFERS = [
@@ -62,10 +62,8 @@ interface Props {
 //     status: "Inactive",
 //   },
 // ];
-  
-  
 
-const OfferTable = ({ offers = [], onClick, onUpdate }: Props) => {
+const OfferTable = ({ offers, onClick, onUpdate }: Props) => {
   const { label, action, tooltip, confirmation, category, subCategory } =
     useStaticValues();
   return (
@@ -113,14 +111,17 @@ const OfferTable = ({ offers = [], onClick, onUpdate }: Props) => {
           }
         >
           <DatatableValue>
-            <ImagePreview imageRef={offer.partner.logo!} />
+            <img
+              src={offer.partner.logo!}
+              className="h-24 w-24 object-cover rounded-md"
+            />
           </DatatableValue>
           <DatatableValue>{offer.title}</DatatableValue>
           <DatatableValue>
-            {/* <Label>{category[offer.partner.category]}</Label> */}
+            <Label>{category[offer.partner.category]}</Label>
           </DatatableValue>
           <DatatableValue>
-            {/* <Label>{subCategory[offer.category]}</Label> */}
+            <Label>{subCategory[offer.category]}</Label>
           </DatatableValue>
           <DatatableValue>
             <OfferStatus status={"Active"} />
@@ -131,4 +132,4 @@ const OfferTable = ({ offers = [], onClick, onUpdate }: Props) => {
   );
 };
 
-export default OfferTable
+export default OfferTable;
