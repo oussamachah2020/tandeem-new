@@ -9,7 +9,7 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
   }
 
   const user = req?.user;
-  const { title, description } = req.body;
+  const { title, description, isAnonymous } = req.body;
 
   if (user) {
     const targetEmployee = await prisma.user.findUnique({
@@ -23,6 +23,7 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
           title,
           description,
           employeeId: targetEmployee?.employee?.id,
+          isAnonymous: isAnonymous || false,
         },
       });
 

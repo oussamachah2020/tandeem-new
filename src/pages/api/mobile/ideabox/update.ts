@@ -8,7 +8,7 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
     return res.status(405).json({ message: "Method not allowed" });
   }
 
-  const { id, title, description } = req.body;
+  const { id, title, description, isAnonymous } = req.body;
 
   const existingIdeaBox = await prisma.ideaBox.findUnique({
     where: {
@@ -24,6 +24,7 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
       data: {
         title,
         description,
+        isAnonymous,
       },
     });
 
